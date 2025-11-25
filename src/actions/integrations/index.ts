@@ -17,31 +17,39 @@ export const onIntegrate = async (code: string) => {
 
   try {
     const integration = await getIntegration(user.id)
+    const existingIntegrations = integration?.integrations ?? []
 
-    if (integration && integration.integrations.length === 0) {
-      const token = await generateTokens(code)
-      console.log(token)
-
-      if (token) {
-        const insta_id = await axios.get(
-          `${process.env.INSTAGRAM_BASE_URL}/me?fields=user_id&access_token=${token.access_token}`
-        )
-
-        const today = new Date()
-        const expire_date = today.setDate(today.getDate() + 60)
-        const create = await createIntegration(
-          user.id,
-          token.access_token,
-          new Date(expire_date),
-          insta_id.data.user_id
-        )
-        return { status: 200, data: create }
-      }
-      console.log('🔴 401')
-      return { status: 401 }
+    if (!integration) {
+      console.log('🔴 404 integration user not found', user.id)
+      return { status: 404 }
     }
-    console.log('🔴 404')
-    return { status: 404 }
+
+    if (existingIntegrations.length === 0) {
+      const token = await generateTokens(code)
+      console.log('instagram token response', token)
+
+      if (!token || !token.access_token) {
+        console.log('🔴 401 invalid or missing Instagram token')
+        return { status: 401 }
+      }
+
+      const insta_id = await axios.get(
+        `${process.env.INSTAGRAM_BASE_URL}/me?fields=user_id&access_token=${token.access_token}`
+      )
+
+      const today = new Date()
+      const expire_date = today.setDate(today.getDate() + 60)
+      const create = await createIntegration(
+        user.id,
+        token.access_token,
+        new Date(expire_date),
+        insta_id.data.user_id
+      )
+      return { status: 200, data: create }
+    }
+
+    console.log('🔴 409 integration already exists for user', user.id)
+    return { status: 409 }
   } catch (error) {
     console.log('🔴 500', error)
     return { status: 500 }

@@ -9,16 +9,29 @@ type Props = {
 }
 
 const Page = async ({ searchParams: { code } }: Props) => {
-  if (code) {
-    console.log(code)
-    const user = await onIntegrate(code.split('#_')[0])
-    if (user.status === 200) {
+  if (!code) {
+    return redirect('/sign-up?error=instagram_no_code')
+  }
+
+  try {
+    const result = await onIntegrate(code.split('#_')[0])
+
+    if (
+      result.status === 200 &&
+      result.data?.firstname &&
+      result.data?.lastname
+    ) {
       return redirect(
-        `/dashboard/${user.data?.firstname}${user.data?.lastname}/integrations`
+        `/dashboard/${result.data.firstname}${result.data.lastname}/integrations`
       )
     }
+
+    // Non-success statuses: 401, 404, 409, 500, etc.
+    return redirect(`/sign-up?error=instagram_${result.status}`)
+  } catch (err) {
+    console.log('🔴 Instagram callback failed', err)
+    return redirect('/sign-up?error=instagram_exception')
   }
-  return redirect('/sign-up')
 }
 
 export default Page
