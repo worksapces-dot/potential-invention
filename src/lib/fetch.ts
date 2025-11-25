@@ -112,9 +112,22 @@ export const generateTokens = async (code: string) => {
     return null
   }
 
-  const long_token = await axios.get(
-    `${process.env.INSTAGRAM_BASE_URL}/access_token?grant_type=ig_exchange_token&client_secret=${process.env.INSTAGRAM_CLIENT_SECRET}&access_token=${token.access_token}`
-  )
+  try {
+    const long_token = await axios.get(
+      `${process.env.INSTAGRAM_BASE_URL}/access_token?grant_type=ig_exchange_token&client_secret=${process.env.INSTAGRAM_CLIENT_SECRET}&access_token=${token.access_token}`
+    )
 
-  return long_token.data
+    return long_token.data
+  } catch (err: any) {
+    console.log(
+      '🔴 Instagram long-lived token exchange failed, falling back to short-lived token',
+      err?.response?.data || err
+    )
+
+    // Fallback: use the short-lived token so the app can still function
+    return {
+      access_token: token.access_token,
+      expires_in: token.expires_in,
+    }
+  }
 }
