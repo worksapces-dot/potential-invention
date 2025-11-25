@@ -33,17 +33,28 @@ export const onIntegrate = async (code: string) => {
         return { status: 401 }
       }
 
-      const insta_id = await axios.get(
-        `${process.env.INSTAGRAM_BASE_URL}/me?fields=user_id&access_token=${token.access_token}`
-      )
-
       const today = new Date()
       const expire_date = today.setDate(today.getDate() + 60)
+      let instagramUserId: string | undefined
+
+      try {
+        const insta_id = await axios.get(
+          `${process.env.INSTAGRAM_BASE_URL}/me?fields=user_id&access_token=${token.access_token}`
+        )
+
+        instagramUserId = insta_id.data.user_id
+      } catch (err: any) {
+        console.log(
+          '🔴 Failed to fetch Instagram user id, proceeding without instagramId',
+          err?.response?.data || err
+        )
+      }
+
       const create = await createIntegration(
         user.id,
         token.access_token,
         new Date(expire_date),
-        insta_id.data.user_id
+        instagramUserId
       )
       return { status: 200, data: create }
     }
