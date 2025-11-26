@@ -5,6 +5,7 @@ import { onCurrentUser } from '../user'
 import { createIntegration, getIntegration } from './queries'
 import { generateTokens } from '@/lib/fetch'
 import axios from 'axios'
+import * as Sentry from '@sentry/nextjs'
 
 export const onOAuthInstagram = (strategy: 'INSTAGRAM' | 'CRM') => {
   if (strategy === 'INSTAGRAM') {
@@ -63,6 +64,7 @@ export const onIntegrate = async (code: string) => {
     return { status: 409 }
   } catch (error) {
     console.log('🔴 500', error)
+    Sentry.captureException(error)
     return { status: 500 }
   }
 }

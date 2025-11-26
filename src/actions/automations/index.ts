@@ -13,6 +13,7 @@ import {
   getAutomations,
   updateAutomation,
 } from './queries'
+import * as Sentry from '@sentry/nextjs'
 
 export const createAutomations = async (id?: string) => {
   const user = await onCurrentUser()
@@ -158,6 +159,7 @@ export const getProfilePosts = async () => {
     return { status: 404 }
   } catch (error) {
     console.log('🔴 server side Error in getting posts ', error)
+    Sentry.captureException(error)
     return { status: 500 }
   }
 }
@@ -179,6 +181,7 @@ export const savePosts = async (
 
     return { status: 404, data: 'Automation not found' }
   } catch (error) {
+    Sentry.captureException(error)
     return { status: 500, data: 'Oops! something went wrong' }
   }
 }
