@@ -17,12 +17,17 @@ const PostButton = ({ id }: Props) => {
   const { data } = useQueryAutomationPosts()
   const { posts, onSelectPost, mutate, isPending } = useAutomationPosts(id)
 
+  const apiPosts: InstagramPostProps[] =
+    data?.status === 200 && Array.isArray(data?.data?.data)
+      ? (data.data.data as InstagramPostProps[])
+      : []
+
   return (
     <TriggerButton label="Attach a post">
-      {data?.status === 200 ? (
+      {data?.status === 200 && apiPosts.length > 0 ? (
         <div className="flex flex-col gap-y-3 w-full">
           <div className="flex flex-wrap w-full gap-3">
-            {data.data.data.map((post: InstagramPostProps) => (
+            {apiPosts.map((post: InstagramPostProps) => (
               <div
                 className="relative w-4/12 aspect-square rounded-lg cursor-pointer overflow-hidden"
                 key={post.id}
