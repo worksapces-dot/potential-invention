@@ -128,13 +128,32 @@ export const getProfilePosts = async () => {
   const user = await onCurrentUser()
   try {
     const profile = await findUser(user.id)
-    const posts = await fetch(
-      `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${profile?.integrations[0]?.token}`
-    )
-    const parsed = await posts.json()
-    console.log('🔥 Instagram Posts Response:', parsed)
+    const token = profile?.integrations[0]?.token
+    const instagramId = profile?.integrations[0]?.instagramId
+
+    if (!token) {
+        console.log('🔴 No token found for user')
+        return { status: 401 }
+    }
+
+    const url = `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${token}`
+    
+    let posts = await fetch(url)
+    let parsed = await posts.json()
+    console.log('🔥 Instagram Posts Response (/me/media):', parsed)
 
     if (parsed && parsed.data) return { status: 200, data: parsed }
+
+    // Fallback: if /me/media failed, try /{user-id}/media if we have an ID
+    if (instagramId) {
+        console.log('⚠️ /me/media failed, trying fallback to ID:', instagramId)
+        const fallbackUrl = `${process.env.INSTAGRAM_BASE_URL}/${instagramId}/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${token}`
+        posts = await fetch(fallbackUrl)
+        parsed = await posts.json()
+        console.log('🔥 Instagram Posts Response (fallback):', parsed)
+        if (parsed && parsed.data) return { status: 200, data: parsed }
+    }
+
     console.log('🔴 Error in getting posts, API returned:', parsed)
     return { status: 404 }
   } catch (error) {
