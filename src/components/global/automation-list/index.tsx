@@ -19,14 +19,19 @@ const AutomationList = (props: Props) => {
   const { pathname } = usePaths()
   
   const optimisticUiData = useMemo(() => {
-    if ((latestVariable && latestVariable?.variables &&  data)) {
+    if (latestVariable && latestVariable.variables && data?.data) {
       const test = [latestVariable.variables, ...data.data]
       return { data: test }
     }
-    return data || { data: [] }
+
+    if (data && Array.isArray(data.data)) {
+      return { data: data.data }
+    }
+
+    return { data: [] as any[] }
   }, [latestVariable, data])
 
-  if (data?.status !== 200 || data.data.length <= 0) {
+  if (data?.status !== 200 || !Array.isArray(data?.data) || data.data.length <= 0) {
     return (
       <div className="h-[70vh] flex justify-center items-center flex-col gap-y-3">
         <h3 className="text-lg text-gray-400">No Automations </h3>
@@ -37,7 +42,12 @@ const AutomationList = (props: Props) => {
 
   return (
     <div className="flex flex-col gap-y-3">
-      {optimisticUiData.data!.map((automation) => (
+      {(optimisticUiData.data || []).map((automation) => {
+        const keywords = Array.isArray(automation.keywords)
+          ? automation.keywords
+          : []
+
+        return (
         <Link
           href={`${pathname}/${automation.id}`}
           key={automation.id}
@@ -49,11 +59,11 @@ const AutomationList = (props: Props) => {
               This is from the comment
             </p>
 
-            {automation.keywords.length > 0 ? (
+            {keywords.length > 0 ? (
               <div className="flex gap-x-2 flex-wrap mt-3">
                 {
                   //@ts-ignore
-                  automation.keywords.map((keyword, key) => (
+                  keywords.map((keyword, key) => (
                     <div
                       key={keyword.id}
                       className={cn(
@@ -102,7 +112,8 @@ const AutomationList = (props: Props) => {
             )}
           </div>
         </Link>
-      ))}
+        )
+      })}
     </div>
   )
 }
