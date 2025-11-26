@@ -3,18 +3,16 @@ import { withSentryConfig } from '@sentry/nextjs'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // Allow all Instagram / Facebook CDN hosts used by the Graph API
+    // and a few other image providers we use.
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'scontent-iad3-2.cdninstagram.com',
+        hostname: '**.cdninstagram.com',
       },
       {
         protocol: 'https',
-        hostname: 'scontent.cdninstagram.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'instagram.fxyz1-1.fna.fbcdn.net',
+        hostname: '**.fbcdn.net',
       },
       {
         protocol: 'https',
