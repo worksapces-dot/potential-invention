@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/providers/theme-provider'
 import { Toaster } from 'sonner'
 import ReactQueryProvider from '@/providers/react-query-provider'
 import ReduxProvider from '@/providers/redux-provider'
+import Script from 'next/script'
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'] })
 
@@ -37,6 +38,13 @@ export default function RootLayout({
 
             <Toaster />
           </ThemeProvider>
+
+          <Script
+            defer
+            data-website-id="dfid_9uVVCAUrFO0PvhaQ5Xh3f"
+            data-domain="potential-invention-orpin.vercel.app"
+            src="https://datafa.st/js/script.js"
+          />
         </body>
       </html>
     </ClerkProvider>
