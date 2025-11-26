@@ -4,7 +4,7 @@ import { currentUser } from '@clerk/nextjs/server'
 
 import { redirect } from 'next/navigation'
 import { createUser, findUser, updateSubscription } from './queries'
-import { refreshToken } from '@/lib/fetch'
+import { refreshToken, getUserProfile } from '@/lib/fetch'
 import { updateIntegration } from '../integrations/queries'
 import { stripe } from '@/lib/stripe'
 
@@ -90,6 +90,23 @@ export const onSubscribe = async (session_id: string) => {
 
       if (subscribed) return { status: 200 }
       return { status: 401 }
+    }
+    return { status: 404 }
+  } catch (error) {
+    return { status: 500 }
+  }
+}
+
+export const getInstagramUserProfile = async () => {
+  const user = await onCurrentUser()
+  try {
+    const profile = await findUser(user.id)
+    if (profile && profile.integrations.length > 0) {
+      const token = profile.integrations[0].token
+      if (token) {
+        const data = await getUserProfile(token)
+        return { status: 200, data }
+      }
     }
     return { status: 404 }
   } catch (error) {

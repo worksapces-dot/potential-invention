@@ -131,3 +131,11 @@ export const generateTokens = async (code: string) => {
     }
   }
 }
+
+export const getUserProfile = async (token: string) => {
+  const response = await axios.get(
+    `${process.env.INSTAGRAM_BASE_URL}/me?fields=id,username,media_count,account_type,followers_count&access_token=${token}`
+  )
+
+  return response.data
+}

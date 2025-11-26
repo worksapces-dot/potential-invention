@@ -47,17 +47,18 @@ model Integrations {
 }
 
 model Automation {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String    @default("Untitled")
-  createdAt DateTime  @default(now())
-  active    Boolean   @default(false)
+  id        String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String             @default("Untitled")
+  createdAt DateTime           @default(now())
+  active    Boolean            @default(false)
   trigger   Trigger[]
   listener  Listener?
   posts     Post[]
   dms       Dms[]
-  User      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String?   @db.Uuid
+  User      User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?            @db.Uuid
   keywords  Keyword[]
+  metrics   AutomationMetric[]
 }
 
 model Dms {
@@ -125,4 +126,16 @@ enum MEDIATYPE {
 enum LISTENERS {
   SMARTAI
   MESSAGE
+}
+
+model AutomationMetric {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Automation     Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automationId   String     @db.Uuid
+  date           DateTime
+  commentsReplied Int       @default(0)
+  dmsSent        Int        @default(0)
+  deliveredCount Int        @default(0)
+
+  @@unique([automationId, date])
 }

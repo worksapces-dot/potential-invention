@@ -49,27 +49,70 @@ export const trackResponses = async (
   automationId: string,
   type: 'COMMENT' | 'DM'
 ) => {
-  if (type === 'COMMENT') {
-    return await client.listener.update({
-      where: { automationId },
-      data: {
-        commentCount: {
-          increment: 1,
-        },
-      },
-    })
-  }
+  const today = new Date()
+  const startOfToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  )
 
-  if (type === 'DM') {
-    return await client.listener.update({
-      where: { automationId },
-      data: {
-        dmCount: {
-          increment: 1,
-        },
+  const isComment = type === 'COMMENT'
+
+  // Update legacy listener counters (all‑time) so existing UI keeps working
+  const listenerUpdate =
+    isComment
+      ? {
+          commentCount: {
+            increment: 1,
+          },
+        }
+      : {
+          dmCount: {
+            increment: 1,
+          },
+        }
+
+  const listenerPromise = client.listener.update({
+    where: { automationId },
+    data: listenerUpdate,
+  })
+
+  // Upsert daily AutomationMetric row for analytics
+  const metricPromise = client.automationMetric.upsert({
+    where: {
+      automationId_date: {
+        automationId,
+        date: startOfToday,
       },
-    })
-  }
+    },
+    update: isComment
+      ? {
+          commentsReplied: {
+            increment: 1,
+          },
+          deliveredCount: {
+            increment: 1,
+          },
+        }
+      : {
+          dmsSent: {
+            increment: 1,
+          },
+          deliveredCount: {
+            increment: 1,
+          },
+        },
+    create: {
+      automationId,
+      date: startOfToday,
+      commentsReplied: isComment ? 1 : 0,
+      dmsSent: isComment ? 0 : 1,
+      deliveredCount: 1,
+    },
+  })
+
+  const [listener, metric] = await Promise.all([listenerPromise, metricPromise])
+  return { listener, metric }
 }
 
 export const createChatHistory = (
