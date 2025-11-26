@@ -144,10 +144,10 @@ export const getProfilePosts = async () => {
 
     if (parsed && parsed.data) return { status: 200, data: parsed }
 
-    // Fallback: if /me/media failed, try /{user-id}/media if we have an ID
+    // Fallback: if /me/media failed, try /{user-id}/media with Graph API URL
     if (instagramId) {
         console.log('⚠️ /me/media failed, trying fallback to ID:', instagramId)
-        const fallbackUrl = `${process.env.INSTAGRAM_BASE_URL}/${instagramId}/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${token}`
+        const fallbackUrl = `https://graph.facebook.com/v21.0/${instagramId}/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${token}`
         posts = await fetch(fallbackUrl)
         parsed = await posts.json()
         console.log('🔥 Instagram Posts Response (fallback):', parsed)
