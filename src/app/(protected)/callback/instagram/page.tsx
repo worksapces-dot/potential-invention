@@ -16,14 +16,8 @@ const Page = async ({ searchParams: { code } }: Props) => {
   try {
     const result = await onIntegrate(code.split('#_')[0])
 
-    if (
-      result.status === 200 &&
-      result.data?.firstname &&
-      result.data?.lastname
-    ) {
-      return redirect(
-        `/dashboard/${result.data.firstname}${result.data.lastname}/integrations`
-      )
+    if (result.status === 200) {
+      return redirect('/integrations')
     }
 
     // Non-success statuses: 401, 404, 409, 500, etc.
