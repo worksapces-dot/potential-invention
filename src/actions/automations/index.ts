@@ -129,11 +129,13 @@ export const getProfilePosts = async () => {
   try {
     const profile = await findUser(user.id)
     const posts = await fetch(
-      `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${profile?.integrations[0].token}`
+      `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${profile?.integrations[0]?.token}`
     )
     const parsed = await posts.json()
-    if (parsed) return { status: 200, data: parsed }
-    console.log('🔴 Error in getting posts')
+    console.log('🔥 Instagram Posts Response:', parsed)
+
+    if (parsed && parsed.data) return { status: 200, data: parsed }
+    console.log('🔴 Error in getting posts, API returned:', parsed)
     return { status: 404 }
   } catch (error) {
     console.log('🔴 server side Error in getting posts ', error)
