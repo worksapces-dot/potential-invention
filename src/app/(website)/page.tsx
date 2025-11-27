@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { ChatWidget } from "@/components/landing/chat-widget"
 import {
   Zap,
   Menu,
@@ -813,6 +814,7 @@ export default function Home() {
       <TestimonialsSection />
       <CtaSection />
       <Footer />
+      <ChatWidget />
     </main>
   )
 }
