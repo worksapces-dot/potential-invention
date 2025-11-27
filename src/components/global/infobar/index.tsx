@@ -16,19 +16,26 @@ import CreateAutomation from '../create-automation'
 import Search from './search'
 import { Notifications } from './notifications'
 import MainBreadCrumb from '../bread-crumbs/main-bread-crumb'
+import { StreakCounter } from '../streak-counter'
 
 type Props = {
   slug: string
+  streak?: {
+    currentStreak: number
+    longestStreak: number
+    isAtRisk: boolean
+    milestone?: number
+  }
 }
 
-const InfoBar = ({ slug }: Props) => {
+const InfoBar = ({ slug, streak }: Props) => {
   const { page } = usePaths()
   const currentPage = PAGE_BREAD_CRUMBS.includes(page) || page == slug
 
   return (
     currentPage && (
       <div className="flex flex-col">
-        <div className="flex gap-x-3 lg:gap-x-5 justify-end">
+        <div className="flex gap-x-3 lg:gap-x-5 justify-end items-center">
           <span className="lg:hidden flex items-center flex-1 gap-x-2">
             <Sheet
               trigger={<Menu />}
@@ -69,6 +76,7 @@ const InfoBar = ({ slug }: Props) => {
               </div>
             </Sheet>
           </span>
+          {streak && <StreakCounter initialStreak={streak} />}
           <Search />
           <CreateAutomation />
           <Notifications />

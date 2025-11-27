@@ -1,18 +1,11 @@
 import { onCurrentUser, getInstagramUserProfile } from '@/actions/user'
-import {
-  getGlobalAutomationStats,
-  getPerAutomationStats,
-  getDailyAutomationActivity,
-} from '@/actions/automations/analytics'
-import { getAiAccountScore } from '@/actions/analytics/ai-score'
-import GlobalMetrics from './_components/global-metrics'
-import AutomationStatsTable from './_components/automation-stats-table'
-import ActivityLineChart from './_components/activity-line-chart'
-import FollowersChart from './_components/followers-chart'
-import GoalTracker from './_components/goal-tracker'
-import AccountScoreCard from './_components/account-score-card'
-import SendReportButton from './_components/send-report-button'
-import { Badge } from '@/components/ui/badge'
+import { getDailyAutomationActivity, getGlobalAutomationStats, getPerAutomationStats } from '@/actions/automations/analytics'
+import { FollowersChartPartial } from './_components/followers-chart-partial'
+import EcommerceSalesChart from './_components/ecommerce-sales-chart'
+import RevenuePerformanceChart from './_components/revenue-performance-chart'
+import AutomationPerformanceChart from './_components/automation-performance-chart'
+import { AIChatbotWidget } from './_components/ai-suggestions-widget'
+import { BarChart3, TrendingUp } from 'lucide-react'
 
 type Props = {
   params: { slug: string }
@@ -21,69 +14,85 @@ type Props = {
 const AnalyticsPage = async ({ params }: Props) => {
   const user = await onCurrentUser()
 
-  const [aiScore, globalStats, perAutomationStats, dailyActivity, userProfile] =
-    await Promise.all([
-      getAiAccountScore(user.id),
-      getGlobalAutomationStats(user.id),
-      getPerAutomationStats(user.id),
-      getDailyAutomationActivity(user.id),
-      getInstagramUserProfile(),
-    ])
+  const [dailyActivity, userProfile, globalStats, perAutomationStats] = await Promise.all([
+    getDailyAutomationActivity(user.id, 90),
+    getInstagramUserProfile(),
+    getGlobalAutomationStats(user.id),
+    getPerAutomationStats(user.id),
+  ])
+
+  // Calculate average engagement
+  const avgEngagement = perAutomationStats.length > 0
+    ? perAutomationStats.reduce((sum, stat) => sum + stat.engagementPercent, 0) / perAutomationStats.length
+    : 0;
+
+  // Prepare user context for AI
+  const userContext = {
+    name: user.firstName || 'there',
+    followers: userProfile.data?.followers_count || 0,
+    totalDMs: globalStats.totalDmsSent,
+    totalReplies: globalStats.totalCommentsReplied,
+    automationCount: perAutomationStats.length,
+    avgEngagement,
+    automations: perAutomationStats.map(stat => ({
+      name: stat.name,
+      dmsSent: stat.dmsSent,
+      commentsReplied: stat.commentsReplied,
+      engagementPercent: stat.engagementPercent,
+    })),
+  };
 
   return (
-    <div className="flex flex-col gap-8">
-      <section className="rounded-3xl border border-white/10 bg-gradient-to-r from-[#191622] via-[#0b0b12] to-[#141b2f] px-6 py-5 shadow-lg shadow-black/40">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1">
-            <h1 className="text-xl lg:text-2xl font-semibold text-white">
-              Growth analytics
-            </h1>
-            <p className="text-xs text-text-secondary max-w-xl">
-              See how your automations are actually performing – from total DMs
-              and comment replies to which flows are driving the most
-              engagement.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 lg:gap-4">
-            <div className="flex items-center gap-2 lg:gap-3">
-              <Badge
-                variant="outline"
-                className="border-white/20 bg-black/30 text-[0.65rem] uppercase tracking-wide text-white"
-              >
-                Last 30 days
-              </Badge>
-              <span className="text-[0.7rem] text-text-secondary">
-                Powered by live Instagram automation activity
-              </span>
+    <div className="relative min-h-screen">
+      {/* Background Gradient */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-background via-background to-muted/20" />
+
+      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto">
+        {/* Header with Gradient */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-border/50 p-8 backdrop-blur-sm">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-chart-2/5 rounded-full blur-3xl" />
+
+          <div className="relative flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+              <BarChart3 className="w-8 h-8 text-primary" />
             </div>
-            <SendReportButton />
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Analytics Dashboard
+              </h1>
+              <p className="text-muted-foreground text-base mt-1 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Real-time overview of your automation performance and growth
+              </p>
+            </div>
           </div>
         </div>
-      </section>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)] items-stretch">
-        <GlobalMetrics stats={globalStats} />
-        {dailyActivity.length > 0 && <ActivityLineChart data={dailyActivity} />}
-      </section>
+        {/* Charts Grid with Stagger Animation */}
+        <div className="grid gap-6 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="animate-in fade-in slide-in-from-left-4 duration-700 delay-100">
+            <FollowersChartPartial currentFollowers={userProfile.data?.followers_count} />
+          </div>
+          <div className="animate-in fade-in slide-in-from-right-4 duration-700 delay-200">
+            <EcommerceSalesChart data={dailyActivity} globalStats={globalStats} />
+          </div>
+        </div>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)] items-start">
-        <AutomationStatsTable stats={perAutomationStats} />
-        <GoalTracker stats={perAutomationStats} />
-      </section>
+        <div className="grid gap-6 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+          <div className="animate-in fade-in slide-in-from-left-4 duration-700 delay-400">
+            <AutomationPerformanceChart stats={perAutomationStats} />
+          </div>
+          <div className="animate-in fade-in slide-in-from-right-4 duration-700 delay-500">
+            <RevenuePerformanceChart data={dailyActivity} />
+          </div>
+        </div>
+      </div>
 
-      {aiScore && (
-        <section>
-          <AccountScoreCard score={aiScore} />
-        </section>
-      )}
-
-      <section>
-        <FollowersChart currentFollowers={userProfile.data?.followers_count} />
-      </section>
+      {/* AI Chatbot Widget */}
+      <AIChatbotWidget userContext={userContext} />
     </div>
   )
 }
 
 export default AnalyticsPage
-
-

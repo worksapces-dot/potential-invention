@@ -205,3 +205,4 @@ const FollowersChart = ({ history, currentFollowers }: Props) => {
 export default FollowersChart
 
 
+

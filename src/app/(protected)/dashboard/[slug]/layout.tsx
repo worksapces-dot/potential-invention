@@ -16,14 +16,23 @@ type Props = {
   params: { slug: string }
 }
 
+import { trackUserLogin } from '@/actions/user/streak'
+
+// ...
+
 const Layout = async ({ children, params }: Props) => {
-
-
   const query = new QueryClient()
 
   await PrefetchUserProfile(query)
-
   await PrefetchUserAutnomations(query)
+
+  const loginResult = await trackUserLogin()
+  const streakData = loginResult.success ? {
+    currentStreak: loginResult.streak || 0,
+    longestStreak: loginResult.longestStreak || 0,
+    isAtRisk: loginResult.isAtRisk || false,
+    milestone: loginResult.milestone || undefined
+  } : undefined
 
   return (
     <HydrationBoundary state={dehydrate(query)}>
@@ -39,7 +48,7 @@ const Layout = async ({ children, params }: Props) => {
       overflow-auto
       "
         >
-          <InfoBar slug={params.slug} />
+          <InfoBar slug={params.slug} streak={streakData} />
           {children}
         </div>
       </div>

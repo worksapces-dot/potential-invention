@@ -23,7 +23,13 @@ model User {
   subscription Subscription?
   integrations Integrations[]
   automations  Automation[]
+  
+  // Streak tracking
+  currentStreak Int      @default(0)
+  longestStreak Int      @default(0)
+  lastLoginAt   DateTime?
 }
+
 
 model Subscription {
   id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
