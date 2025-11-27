@@ -8,26 +8,26 @@ import {
   Menu,
   X,
   ArrowRight,
-  Eye,
+  MessageCircle,
   Sparkles,
-  Calendar,
-  Database,
-  FileText,
-  Share2,
+  Target,
+  BarChart3,
+  ShoppingBag,
   Bot,
   Link2,
   Play,
   Rocket,
   CheckCircle2,
   Clock,
-  Code2,
   TrendingUp,
   ArrowUpRight,
   Building2,
-  Code,
+  Megaphone,
   Users,
   Star,
   Quote,
+  Send,
+  Heart,
 } from "lucide-react"
 
 // ============================================================================
@@ -92,7 +92,7 @@ function Header() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground transition-transform group-hover:scale-105">
               <Zap className="h-4 w-4 text-background" fill="currentColor" />
             </div>
-            <span className="text-lg font-bold tracking-tight">Fortress</span>
+            <span className="text-lg font-bold tracking-tight">Slide</span>
           </Link>
 
           <nav className="hidden items-center gap-8 lg:flex">
@@ -166,43 +166,43 @@ function HeroSection() {
           <div className="mb-8 md:mb-12 animate-fade-in">
             <span className="inline-flex items-center gap-2 rounded-full bg-muted px-5 py-2.5 text-sm font-medium text-foreground">
               <Sparkles className="h-4 w-4" />
-              Automation guide
+              Instagram DM Automation
             </span>
           </div>
 
           {/* Main headline */}
           <div className="mb-8 md:mb-10">
             <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.1] animate-slide-up">
-              How to go from
+              Turn comments into
             </h1>
 
             {/* Pills with floating icons inline */}
             <div className="mt-4 md:mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4 lg:gap-5 animate-slide-up delay-100">
-              {/* TikTok icon */}
-              <div className="animate-float hidden sm:block">
-                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-background shadow-2xl border border-border/50 hover-lift">
-                  <TikTokIcon className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-foreground" />
+              {/* Comment icon - animated floating */}
+              <div className="hidden sm:block animate-float">
+                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-background shadow-2xl border border-border/50 transition-all duration-300 hover:scale-110 hover:shadow-3xl">
+                  <MessageCircle className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-foreground transition-transform hover:scale-110" />
                 </div>
               </div>
 
-              {/* 0 tasks pill */}
+              {/* DMs pill */}
               <span className="inline-flex items-center gap-2 md:gap-3 rounded-full bg-foreground px-5 py-2.5 md:px-7 md:py-3.5 text-background shadow-xl">
-                <Eye className="h-4 w-4 md:h-5 md:w-5" />
-                <span className="text-xl md:text-2xl lg:text-3xl font-bold">0 tasks</span>
+                <Send className="h-4 w-4 md:h-5 md:w-5" />
+                <span className="text-xl md:text-2xl lg:text-3xl font-bold">DMs</span>
               </span>
 
-              <span className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold">to</span>
+              <span className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold">&</span>
 
-              {/* 10K+ pill */}
+              {/* Sales pill */}
               <span className="inline-flex items-center gap-2 md:gap-3 rounded-full bg-foreground px-5 py-2.5 md:px-7 md:py-3.5 text-background shadow-xl">
-                <Eye className="h-4 w-4 md:h-5 md:w-5" />
-                <span className="text-xl md:text-2xl lg:text-3xl font-bold">10K+</span>
+                <TrendingUp className="h-4 w-4 md:h-5 md:w-5" />
+                <span className="text-xl md:text-2xl lg:text-3xl font-bold">Sales</span>
               </span>
 
-              {/* Instagram icon */}
-              <div className="animate-float-reverse delay-200 hidden sm:block">
-                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-background shadow-2xl border border-border/50 hover-lift">
-                  <InstagramIcon className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12" />
+              {/* Instagram icon - animated floating with delay */}
+              <div className="hidden sm:block animate-float-reverse" style={{ animationDelay: "0.5s" }}>
+                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-background shadow-2xl border border-border/50 transition-all duration-300 hover:scale-110 hover:shadow-3xl">
+                  <InstagramIcon className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 transition-transform hover:scale-110" />
                 </div>
               </div>
             </div>
@@ -210,26 +210,24 @@ function HeroSection() {
 
           {/* Subtitle */}
           <p className="mx-auto mb-10 md:mb-12 max-w-2xl text-lg md:text-xl lg:text-2xl italic text-muted-foreground leading-relaxed animate-slide-up delay-200">
-            Using the system that automated 500M+ tasks across businesses...
+            Automate your Instagram DMs with AI-powered responses.
             <br className="hidden md:block" />
-            Leading to 100K+ hours saved & $2M+ in revenue generated
+            Reply to comments, capture leads, and grow your business 24/7.
           </p>
 
           {/* Feature bullets */}
           <div className="mb-10 md:mb-14 animate-slide-up delay-300">
-            <p className="mb-5 text-sm text-muted-foreground tracking-wider uppercase">In this guide...</p>
+            <p className="mb-5 text-sm text-muted-foreground tracking-wider uppercase">What you get...</p>
             <div className="flex flex-wrap items-center justify-center gap-x-5 md:gap-x-8 gap-y-3 text-sm md:text-base font-medium">
-              {["30-day action plan", "Workflow templates", "How to find winning automations", "Using AI tools"].map(
-                (item) => (
-                  <span key={item} className="text-foreground flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
-                    {item}
-                  </span>
-                ),
-              )}
+              {["Auto DM replies", "Keyword triggers", "AI-powered responses", "Comment automation"].map((item) => (
+                <span key={item} className="text-foreground flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
+                  {item}
+                </span>
+              ))}
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 md:gap-x-8 gap-y-3 text-sm md:text-base font-medium">
-              {["Converting automation to revenue", "How to scale while solo/small team"].map((item) => (
+              {["Analytics dashboard", "Template marketplace"].map((item) => (
                 <span key={item} className="text-foreground flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
                   {item}
@@ -245,11 +243,11 @@ function HeroSection() {
                 size="lg"
                 className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
-                Get started
+                Start automating free
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-            <p className="text-sm md:text-base text-muted-foreground">for free. no signup. no email.</p>
+            <p className="text-sm md:text-base text-muted-foreground">Free plan available. No credit card required.</p>
           </div>
         </div>
       </div>
@@ -263,40 +261,40 @@ function HeroSection() {
 
 const features = [
   {
-    icon: InstagramIcon,
-    title: "Social Media Automation",
-    description: "Schedule posts, track engagement, and grow your audience across Instagram, TikTok, and more.",
+    icon: MessageCircle,
+    title: "Auto DM Replies",
+    description: "Automatically respond to Instagram DMs based on keywords. Never miss a lead or customer inquiry again.",
     tag: "Popular",
   },
   {
-    icon: Database,
-    title: "Data Extraction",
-    description: "Pull data from websites, PDFs, and APIs without manual copy-pasting or complex scripts.",
+    icon: Target,
+    title: "Keyword Triggers",
+    description: "Set up custom keywords that trigger automated responses. Perfect for giveaways, promos, and lead capture.",
     tag: null,
-  },
-  {
-    icon: Calendar,
-    title: "Content Scheduling",
-    description: "Plan your content calendar and publish automatically at the perfect times for your audience.",
-    tag: null,
-  },
-  {
-    icon: FileText,
-    title: "Document Generation",
-    description: "Create contracts, invoices, and reports automatically from your templates and data.",
-    tag: null,
-  },
-  {
-    icon: Share2,
-    title: "500+ Integrations",
-    description: "Connect all your favorite apps and services to create seamless cross-platform workflows.",
-    tag: "New",
   },
   {
     icon: Bot,
-    title: "AI-Powered Workflows",
-    description: "Let AI handle complex decisions and optimize your automation for maximum efficiency.",
-    tag: "Beta",
+    title: "Smart AI Responses",
+    description: "Let AI craft personalized replies based on context. Engage followers with human-like conversations.",
+    tag: "Pro",
+  },
+  {
+    icon: Heart,
+    title: "Comment Automation",
+    description: "Auto-reply to comments on your posts. Turn engagement into conversations and sales opportunities.",
+    tag: null,
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics Dashboard",
+    description: "Track DMs sent, comments replied, and conversion rates. Measure what matters for your growth.",
+    tag: "New",
+  },
+  {
+    icon: ShoppingBag,
+    title: "Template Marketplace",
+    description: "Buy and sell automation templates, AI prompts, and keyword lists. Monetize your expertise.",
+    tag: "New",
   },
 ]
 
@@ -310,10 +308,10 @@ function FeaturesSection() {
             Features
           </span>
           <h2 className="mb-5 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-            Powerful automations for every workflow
+            Everything you need to automate Instagram
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground">
-            From simple tasks to complex multi-step processes, automate anything your business needs.
+            From DM automation to AI-powered responses, grow your Instagram on autopilot.
           </p>
         </div>
 
@@ -350,20 +348,20 @@ const steps = [
   {
     number: "01",
     icon: Link2,
-    title: "Connect",
-    description: "Link your favorite apps and tools in seconds. No complex setup or technical knowledge required.",
+    title: "Connect Instagram",
+    description: "Link your Instagram account in seconds. Secure OAuth connection, no password sharing required.",
   },
   {
     number: "02",
     icon: Play,
-    title: "Automate",
-    description: "Build powerful workflows using our visual editor. Drag, drop, and configure your automation logic.",
+    title: "Set Up Triggers",
+    description: "Create keyword triggers and AI prompts. Define what happens when someone comments or DMs you.",
   },
   {
     number: "03",
     icon: Rocket,
-    title: "Launch",
-    description: "Activate your automation and watch it work 24/7. Monitor performance and optimize as you grow.",
+    title: "Watch It Work",
+    description: "Activate your automation and let it run 24/7. Track performance in your analytics dashboard.",
   },
 ]
 
@@ -376,10 +374,10 @@ function HowItWorksSection() {
             How It Works
           </span>
           <h2 className="mb-5 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-            Get started in minutes
+            Start automating in 3 steps
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground">
-            Our simple three-step process gets you automating faster than ever.
+            Connect your Instagram, set up triggers, and let AI handle the rest.
           </p>
         </div>
 
@@ -419,23 +417,23 @@ function HowItWorksSection() {
 const benefits = [
   {
     icon: Clock,
-    title: "Save 20+ Hours Weekly",
-    description: "Reclaim your time by automating repetitive tasks that drain your productivity.",
+    title: "Reply Instantly 24/7",
+    description: "Never miss a DM or comment again. Respond to followers even while you sleep.",
   },
   {
     icon: TrendingUp,
-    title: "Scale Without Limits",
-    description: "Handle 10x the workload without hiring. Your automations work around the clock.",
+    title: "Convert More Leads",
+    description: "Turn casual commenters into paying customers with automated follow-up sequences.",
   },
   {
     icon: CheckCircle2,
-    title: "99.9% Accuracy",
-    description: "Eliminate human error with precise, consistent automation every single time.",
+    title: "Grow Engagement",
+    description: "Boost your engagement rate by responding to every comment and DM automatically.",
   },
   {
-    icon: Code2,
-    title: "No Coding Required",
-    description: "Build sophisticated workflows with our intuitive visual builder. Zero technical skills needed.",
+    icon: Bot,
+    title: "AI That Sounds Like You",
+    description: "Smart AI responses that match your brand voice. Personal touch at scale.",
   },
 ]
 
@@ -447,13 +445,13 @@ function BenefitsSection() {
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <div>
               <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-muted px-5 py-2.5 text-sm font-medium text-foreground">
-                Why Fortress
+                Why Slide
               </span>
               <h2 className="mb-6 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-                Why teams choose Fortress
+                Why creators choose Slide
               </h2>
               <p className="mb-10 text-lg md:text-xl text-muted-foreground leading-relaxed">
-                Join thousands of businesses that have transformed their operations with intelligent automation.
+                Join thousands of creators and businesses automating their Instagram engagement.
               </p>
 
               <div className="grid gap-6 sm:grid-cols-2">
@@ -487,9 +485,9 @@ function BenefitsSection() {
 
                 <div className="space-y-8">
                   {[
-                    { label: "Tasks Completed", value: "12,847", width: "85%" },
-                    { label: "Time Saved", value: "342 hours", width: "72%" },
-                    { label: "Success Rate", value: "99.8%", width: "99%" },
+                    { label: "DMs Sent", value: "12,847", width: "85%" },
+                    { label: "Comments Replied", value: "8,234", width: "72%" },
+                    { label: "Response Rate", value: "99.8%", width: "99%" },
                   ].map((stat, i) => (
                     <div key={stat.label}>
                       <div className="mb-4 flex justify-between items-end">
@@ -524,27 +522,27 @@ function BenefitsSection() {
 const useCases = [
   {
     icon: InstagramIcon,
-    title: "Creators",
-    description: "Automate content publishing, engagement tracking, and audience growth across all platforms.",
-    examples: ["Auto-post to Instagram", "Track analytics", "Manage sponsorships"],
+    title: "Content Creators",
+    description: "Engage with your audience automatically. Run giveaways, capture leads, and grow your following.",
+    examples: ["Giveaway automation", "Lead magnets", "Fan engagement"],
   },
   {
-    icon: Code,
-    title: "Developers",
-    description: "Streamline deployment pipelines, monitoring alerts, and development workflows.",
-    examples: ["CI/CD triggers", "Error notifications", "Code reviews"],
+    icon: Megaphone,
+    title: "Influencers",
+    description: "Handle brand inquiries and collaboration requests automatically. Never miss an opportunity.",
+    examples: ["Brand outreach", "Rate card delivery", "Collab responses"],
   },
   {
     icon: Building2,
-    title: "Agencies",
-    description: "Scale client work with automated reporting, task management, and deliverable tracking.",
-    examples: ["Client onboarding", "Report generation", "Project updates"],
+    title: "E-commerce Brands",
+    description: "Convert Instagram followers into customers with automated product info and support.",
+    examples: ["Product inquiries", "Order support", "Promo codes"],
   },
   {
     icon: Users,
-    title: "Small Businesses",
-    description: "Run your operations on autopilot with customer communications and order processing.",
-    examples: ["Invoice automation", "Customer follow-ups", "Inventory alerts"],
+    title: "Coaches & Consultants",
+    description: "Qualify leads and book calls automatically. Turn DMs into discovery calls.",
+    examples: ["Lead qualification", "Calendar booking", "Course sales"],
   },
 ]
 
@@ -557,10 +555,10 @@ function UseCasesSection() {
             Use Cases
           </span>
           <h2 className="mb-5 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-            Built for every team
+            Built for Instagram growth
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground">
-            {"Whether you're a solo creator or a growing agency, Fortress adapts to your needs."}
+            {"Whether you're a solo creator or a growing brand, Slide scales with you."}
           </p>
         </div>
 
@@ -607,26 +605,26 @@ function UseCasesSection() {
 const testimonials = [
   {
     quote:
-      "Fortress saved our team 30 hours per week. We've automated our entire client onboarding process and it runs flawlessly.",
+      "Slide helped me respond to 500+ DMs during my product launch. I would have missed so many sales without it!",
     author: "Sarah Chen",
-    role: "Operations Lead",
-    company: "Bright Agency",
+    role: "Content Creator",
+    company: "150K followers",
     avatar: "SC",
   },
   {
     quote:
-      "The no-code builder is incredibly intuitive. I set up complex workflows in minutes that would have taken days to code.",
+      "The AI responses are incredible. My followers can't tell it's automated. Engagement is up 3x since I started using Slide.",
     author: "Marcus Rodriguez",
-    role: "Founder",
-    company: "TechScale",
+    role: "Fitness Coach",
+    company: "80K followers",
     avatar: "MR",
   },
   {
     quote:
-      "We've processed over 50,000 orders automatically with zero errors. This tool has been a game-changer for our e-commerce business.",
+      "We run all our giveaways through Slide now. Automatic DMs to winners, keyword entries, everything. Total game-changer.",
     author: "Emily Watson",
-    role: "CEO",
-    company: "Bloom Commerce",
+    role: "Brand Manager",
+    company: "StyleCo",
     avatar: "EW",
   },
 ]
@@ -640,10 +638,10 @@ function TestimonialsSection() {
             Testimonials
           </span>
           <h2 className="mb-5 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-            Loved by thousands of teams
+            Loved by creators everywhere
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground">
-            See what our customers have to say about transforming their workflows.
+            See how creators are growing their Instagram with Slide.
           </p>
         </div>
 
@@ -697,14 +695,14 @@ function CtaSection() {
         <div className="mx-auto max-w-3xl text-center">
           <span className="mb-8 inline-flex items-center gap-2 rounded-full bg-background px-5 py-2.5 text-sm font-medium text-foreground shadow-sm">
             <Sparkles className="h-4 w-4" />
-            Start automating in minutes
+            Start automating today
           </span>
 
           <h2 className="mb-6 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-            Ready to Transform Your Workflow?
+            Ready to automate your Instagram?
           </h2>
           <p className="mx-auto mb-12 max-w-xl text-lg md:text-xl text-muted-foreground leading-relaxed">
-            {"Join 10,000+ businesses automating their workflows. Get started for free—no credit card required."}
+            {"Join thousands of creators automating their DMs. Start free—no credit card required."}
           </p>
 
           <div className="flex flex-col items-center gap-5">
@@ -713,11 +711,11 @@ function CtaSection() {
                 size="lg"
                 className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
-                Get Started Free
+                Start Automating Free
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-            <p className="text-sm md:text-base text-muted-foreground">Free plan includes 1,000 tasks/month</p>
+            <p className="text-sm md:text-base text-muted-foreground">Free plan includes unlimited automations</p>
           </div>
         </div>
       </div>
@@ -739,11 +737,10 @@ function Footer() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground transition-transform group-hover:scale-105">
                 <Zap className="h-5 w-5 text-background" fill="currentColor" />
               </div>
-              <span className="text-xl font-bold tracking-tight">Fortress</span>
+              <span className="text-xl font-bold tracking-tight">Slide</span>
             </Link>
             <p className="mt-5 max-w-xs text-muted-foreground leading-relaxed">
-              Automate everything. Grow faster. Join thousands of teams scaling their operations with intelligent
-              automation.
+              Automate your Instagram DMs. Turn comments into customers. Grow your business on autopilot.
             </p>
             <div className="mt-8 flex items-center gap-3">
               {[InstagramIcon, TikTokIcon, TwitterIcon, YouTubeIcon].map((Icon, i) => (
@@ -759,9 +756,9 @@ function Footer() {
           </div>
 
           {[
-            { title: "Product", links: ["Features", "Integrations", "Pricing", "Changelog"] },
+            { title: "Product", links: ["Features", "Marketplace", "Pricing", "Changelog"] },
             { title: "Resources", links: ["Documentation", "Tutorials", "Blog", "Support"] },
-            { title: "Company", links: ["About", "Careers", "Privacy", "Terms"] },
+            { title: "Company", links: ["About", "Privacy", "Terms"] },
           ].map((section) => (
             <div key={section.title}>
               <h4 className="mb-5 font-semibold">{section.title}</h4>
@@ -779,8 +776,8 @@ function Footer() {
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
-          <p className="text-sm text-muted-foreground">2025 Fortress. All rights reserved.</p>
-          <p className="text-sm text-muted-foreground">Made with love for automation enthusiasts.</p>
+          <p className="text-sm text-muted-foreground">2025 Slide. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">Made with love for Instagram creators.</p>
         </div>
       </div>
     </footer>

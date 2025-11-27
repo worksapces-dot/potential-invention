@@ -8,6 +8,7 @@ import ClerkAuthState from '../clerk-auth-state'
 import { HelpDuoToneWhite } from '@/icons'
 import { SubscriptionPlan } from '../subscription-plan'
 import UpgradeCard from './upgrade'
+import VerifiedBadge from '../verified-badge'
 
 type Props = {
   slug: string
@@ -64,9 +65,12 @@ const Sidebar = ({ slug }: Props) => {
           />
         </div>
         <div className="px-3 flex flex-col gap-y-5">
-          <div className="flex gap-x-2">
+          <div className="flex gap-x-2 items-center">
             <ClerkAuthState />
             <p className="text-[#9B9CA0]">Profile</p>
+            <SubscriptionPlan type="PRO">
+              <VerifiedBadge size="sm" />
+            </SubscriptionPlan>
           </div>
           <div className="flex gap-x-3">
             <HelpDuoToneWhite />

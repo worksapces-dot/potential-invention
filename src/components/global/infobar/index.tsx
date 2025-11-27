@@ -17,6 +17,7 @@ import Search from './search'
 import { Notifications } from './notifications'
 import MainBreadCrumb from '../bread-crumbs/main-bread-crumb'
 import { StreakCounter } from '../streak-counter'
+import VerifiedBadge from '../verified-badge'
 
 type Props = {
   slug: string
@@ -59,9 +60,12 @@ const InfoBar = ({ slug, streak }: Props) => {
                   />
                 </div>
                 <div className="px-3 flex flex-col gap-y-5">
-                  <div className="flex gap-x-2">
+                  <div className="flex gap-x-2 items-center">
                     <ClerkAuthState />
                     <p className="text-[#9B9CA0]">Profile</p>
+                    <SubscriptionPlan type="PRO">
+                      <VerifiedBadge size="sm" />
+                    </SubscriptionPlan>
                   </div>
                   <div className="flex gap-x-3">
                     <HelpDuoToneWhite />

@@ -28,6 +28,23 @@ model User {
   currentStreak Int      @default(0)
   longestStreak Int      @default(0)
   lastLoginAt   DateTime?
+  
+  // Marketplace
+  sellerProfile SellerProfile?
+  purchases     Purchase[]
+  reviews       Review[]
+  
+  // Referral system
+  referralCode     String?    @unique
+  referredBy       User?      @relation("Referrals", fields: [referredById], references: [id])
+  referredById     String?    @db.Uuid
+  referrals        User[]     @relation("Referrals")
+  referralRewards  ReferralReward[]
+  
+  // Feedback system
+  featureRequests  FeatureRequest[]
+  featureVotes     FeatureVote[]
+  featureComments  FeatureComment[]
 }
 
 
@@ -144,4 +161,333 @@ model AutomationMetric {
   deliveredCount Int        @default(0)
 
   @@unique([automationId, date])
+}
+
+
+// ============================================================================
+// MARKETPLACE MODELS
+// ============================================================================
+
+model SellerProfile {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             String    @unique @db.Uuid
+  
+  // Stripe Connect
+  stripeAccountId    String?   @unique
+  onboardingComplete Boolean   @default(false)
+  
+  // Stats
+  totalSales         Int       @default(0)
+  totalRevenue       Int       @default(0) // in cents
+  rating             Float     @default(0)
+  
+  products           Product[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Product {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  // Basic info
+  name            String
+  description     String          @db.Text
+  price           Int             // in cents
+  category        ProductCategory
+  tags            String[]        // Tags for search
+  
+  // Seller
+  SellerProfile   SellerProfile   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId        String          @db.Uuid
+  
+  // Stripe
+  stripeProductId String?         @unique
+  stripePriceId   String?         @unique
+  
+  // Status
+  active          Boolean         @default(true)
+  featured        Boolean         @default(false)
+  
+  // Content (stores automation config, prompts, etc.)
+  content         Json
+  
+  // Stats
+  salesCount      Int             @default(0)
+  views           Int             @default(0)
+  rating          Float           @default(0)
+  reviewCount     Int             @default(0)
+  
+  // Media
+  thumbnail       String?
+  images          String[]
+  
+  purchases       Purchase[]
+  reviews         Review[]
+  promotions      Promotion[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([category])
+  @@index([sellerId])
+  @@index([active])
+  @@index([rating])
+  @@index([salesCount])
+}
+
+// Product Promotion System
+model Promotion {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  Product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId       String          @db.Uuid
+  
+  // Promotion details
+  tier            PromotionTier
+  boostViews      Int             // Target views to boost
+  viewsDelivered  Int             @default(0)
+  
+  // Payment
+  amount          Int             // Amount paid in cents
+  stripePaymentId String?         @unique
+  
+  // Status
+  status          PromotionStatus @default(PENDING)
+  
+  // Duration
+  startsAt        DateTime        @default(now())
+  endsAt          DateTime
+  
+  createdAt       DateTime        @default(now())
+  
+  @@index([productId])
+  @@index([status])
+  @@index([endsAt])
+}
+
+enum PromotionTier {
+  BASIC       // $2 - 500 views, 3 days
+  STANDARD    // $5 - 1500 views, 7 days  
+  PREMIUM     // $10 - 5000 views, 14 days
+}
+
+enum PromotionStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Purchase {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  // Buyer
+  User            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String         @db.Uuid
+  
+  // Product
+  Product         Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId       String         @db.Uuid
+  
+  // Payment
+  stripePaymentId String         @unique
+  amount          Int            // in cents (total paid by buyer)
+  platformFee     Int            // 10% platform fee
+  sellerPayout    Int            // 90% to seller
+  
+  status          PurchaseStatus @default(PENDING)
+  
+  // Applied to account
+  applied         Boolean        @default(false)
+  appliedAt       DateTime?
+  
+  // Refund window (7 days)
+  refundableUntil DateTime
+  
+  createdAt       DateTime       @default(now())
+  
+  @@index([userId])
+  @@index([productId])
+  @@index([status])
+}
+
+model Review {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  Product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   String   @db.Uuid
+  
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String   @db.Uuid
+  
+  rating      Int      // 1-5 stars
+  comment     String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([productId, userId])
+  @@index([productId])
+}
+
+enum ProductCategory {
+  AUTOMATION_TEMPLATE
+  AI_PROMPT_PACK
+  KEYWORD_LIST
+  ANALYTICS_TEMPLATE
+  INTEGRATION_CONFIG
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ============================================================================
+// REFERRAL SYSTEM MODELS
+// ============================================================================
+
+model ReferralReward {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String        @db.Uuid
+  
+  type        RewardType
+  amount      Int           // in cents for CREDIT, days for SUBSCRIPTION_EXTENSION
+  description String
+  claimed     Boolean       @default(false)
+  claimedAt   DateTime?
+  
+  // Reference to what triggered this reward
+  referredUserId String?    @db.Uuid
+  
+  createdAt   DateTime      @default(now())
+  
+  @@index([userId])
+  @@index([claimed])
+}
+
+enum RewardType {
+  CREDIT              // Account credit in cents
+  SUBSCRIPTION_EXTENSION  // Extra days of pro subscription
+  MARKETPLACE_DISCOUNT    // Discount on marketplace purchases
+}
+
+// ============================================================================
+// FEEDBACK SYSTEM MODELS
+// ============================================================================
+
+model FeatureRequest {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  // Content
+  title       String
+  description String   @db.Text
+  category    FeatureCategory
+  
+  // Author
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String   @db.Uuid
+  
+  // Status
+  status      FeatureStatus @default(PENDING)
+  priority    FeaturePriority @default(LOW)
+  
+  // Voting
+  upvotes     Int      @default(0)
+  downvotes   Int      @default(0)
+  score       Int      @default(0) // upvotes - downvotes for sorting
+  
+  // Admin response
+  adminResponse String? @db.Text
+  adminUserId   String? @db.Uuid
+  respondedAt   DateTime?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  votes       FeatureVote[]
+  comments    FeatureComment[]
+  
+  @@index([status])
+  @@index([category])
+  @@index([score])
+  @@index([createdAt])
+}
+
+model FeatureVote {
+  id        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  User      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String         @db.Uuid
+  
+  FeatureRequest FeatureRequest @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  featureId String         @db.Uuid
+  
+  voteType  VoteType
+  createdAt DateTime       @default(now())
+  
+  @@unique([userId, featureId])
+  @@index([featureId])
+}
+
+model FeatureComment {
+  id        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  content   String         @db.Text
+  
+  User      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String         @db.Uuid
+  
+  FeatureRequest FeatureRequest @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  featureId String         @db.Uuid
+  
+  // Reply system
+  parentId  String?        @db.Uuid
+  parent    FeatureComment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   FeatureComment[] @relation("CommentReplies")
+  
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  
+  @@index([featureId])
+  @@index([parentId])
+}
+
+enum FeatureCategory {
+  AUTOMATION
+  INTEGRATIONS
+  UI_UX
+  ANALYTICS
+  MARKETPLACE
+  MOBILE_APP
+  API
+  SECURITY
+  PERFORMANCE
+  OTHER
+}
+
+enum FeatureStatus {
+  PENDING
+  UNDER_REVIEW
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum FeaturePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
 }

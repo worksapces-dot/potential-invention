@@ -4,7 +4,7 @@ import { withSentryConfig } from '@sentry/nextjs'
 const nextConfig = {
   images: {
     // Allow all Instagram / Facebook CDN hosts used by the Graph API
-    // and a few other image providers we use.
+    // and a few other image providers we use. I love u
     remotePatterns: [
       {
         protocol: 'https',
@@ -25,6 +25,18 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.yourdomain.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.public.blob.vercel-storage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.blob.vercel-storage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'gotjjjgbnzptvfiw.public.blob.vercel-storage.com',
       },
     ],
   },

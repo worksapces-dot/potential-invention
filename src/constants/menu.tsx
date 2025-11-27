@@ -4,7 +4,9 @@ import {
   RocketDuoToneWhite,
   SettingsDuoToneWhite,
   BarDuoToneBlue,
+  BriefCaseDuoToneWhite,
 } from '@/icons'
+import { Lightbulb } from 'lucide-react'
 import { v4 as uuid } from 'uuid'
 
 export type FieldProps = {
@@ -36,6 +38,16 @@ export const SIDEBAR_MENU: SideBarProps[] = [
     id: uuid(),
     label: 'analytics',
     icon: <BarDuoToneBlue />,
+  },
+  {
+    id: uuid(),
+    label: 'marketplace',
+    icon: <BriefCaseDuoToneWhite />,
+  },
+  {
+    id: uuid(),
+    label: 'feedback',
+    icon: <Lightbulb className="h-5 w-5" />,
   },
   {
     id: uuid(),

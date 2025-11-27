@@ -1,9 +1,11 @@
 import DoubleGradientCard from '@/components/global/double-gradient-card'
+import ReferralWelcomeBanner from '@/components/referral/referral-welcome-banner'
 import { DASHBOARD_CARDS } from '@/constants/dashboard'
 import { BarDuoToneBlue } from '@/icons'
 import React from 'react'
 import Chart from './_components/metrics'
 import MetricsCard from './_components/metrics/metrics-card'
+import SellerRevenueWidget from './_components/seller-revenue-widget'
 
 type Props = {}
 
@@ -11,6 +13,9 @@ const Page = (props: Props) => {
 
   return (
     <div className="flex flex-col gap-y-10">
+      {/* Referral Welcome Banner */}
+      <ReferralWelcomeBanner />
+      
       <div className="flex gap-5 lg:flex-row flex-col">
         {DASHBOARD_CARDS.map((card) => (
           <DoubleGradientCard
@@ -19,6 +24,10 @@ const Page = (props: Props) => {
           />
         ))}
       </div>
+      
+      {/* Seller Revenue Widget */}
+      <SellerRevenueWidget />
+      
       <div className="border-[1px] relative border-in-active/50 p-5 rounded-xl">
         <span className="flex gap-x-1 z-50 items-center">
           <BarDuoToneBlue />
