@@ -1,0 +1,12 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow protected routes
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /callback/
+Disallow: /payment/
+
+# Allow search engines to find the sitemap
+Sitemap: https://getslide.app/sitemap.xml

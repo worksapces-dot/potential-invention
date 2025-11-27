@@ -6,6 +6,12 @@ import RevenuePerformanceChart from './_components/revenue-performance-chart'
 import AutomationPerformanceChart from './_components/automation-performance-chart'
 import { AIChatbotWidget } from './_components/ai-suggestions-widget'
 import { BarChart3, TrendingUp } from 'lucide-react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Analytics',
+  description: 'Track your Instagram automation performance with real-time analytics. Monitor DMs sent, comments replied, and engagement rates.',
+}
 
 type Props = {
   params: { slug: string }

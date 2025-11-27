@@ -1,6 +1,12 @@
 import { INTEGRATION_CARDS } from '@/constants/integrations'
 import React from 'react'
 import IntegrationCard from './_components/integration-card'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Integrations',
+  description: 'Connect your Instagram account and other services to power your automations.',
+}
 
 type Props = {}
 

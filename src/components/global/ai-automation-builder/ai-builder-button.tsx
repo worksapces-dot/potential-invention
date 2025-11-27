@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
 import AIAutomationBuilder from './index'
 import { createAIAutomation } from '@/actions/automations/ai-builder'
 import { getProfilePosts } from '@/actions/automations'
@@ -59,12 +60,20 @@ const AIBuilderButton = ({ slug }: AIBuilderButtonProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full bg-gradient-to-r from-[#3352CC] to-[#5577FF] hover:from-[#2A42B8] hover:to-[#4466EE] rounded-xl">
-          <Sparkles className="h-4 w-4 mr-2" />
-          Create with AI
-        </Button>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Button className="w-full relative overflow-hidden group bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:via-purple-500 hover:to-fuchsia-500 rounded-xl h-11 shadow-lg shadow-purple-500/20">
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            
+            <Sparkles className="h-4 w-4 mr-2 relative z-10" />
+            <span className="relative z-10 font-medium">Create with AI</span>
+          </Button>
+        </motion.div>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl h-[80vh] p-0 bg-[#0e0e0e] border-[#545454]">
+      <DialogContent className="max-w-3xl h-[85vh] p-0 bg-[#0a0a0a] border-white/10 rounded-2xl overflow-hidden">
         <AIAutomationBuilder 
           onAutomationCreated={handleAutomationCreated}
           posts={posts}

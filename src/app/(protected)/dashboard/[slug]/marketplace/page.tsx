@@ -5,6 +5,12 @@ import SearchFilters from '@/components/marketplace/search-filters'
 import ProductCard from '@/components/marketplace/product-card'
 import Link from 'next/link'
 import { Store, Flame as Fire, Clock, Award, ShoppingBag } from 'lucide-react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Marketplace',
+  description: 'Browse and purchase automation templates, AI prompts, and keyword lists. Monetize your expertise by selling your own templates.',
+}
 
 type Props = {
   searchParams: { [key: string]: string | undefined }

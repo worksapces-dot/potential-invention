@@ -10,15 +10,22 @@ import {
   PrefetchUserAutnomations,
   PrefetchUserProfile,
 } from '@/react-query/prefetch'
+import { Metadata } from 'next'
+import { trackUserLogin } from '@/actions/user/streak'
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  description: 'Manage your Instagram automations, view analytics, and grow your engagement with Slide.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 type Props = {
   children: React.ReactNode
   params: { slug: string }
 }
-
-import { trackUserLogin } from '@/actions/user/streak'
-
-// ...
 
 const Layout = async ({ children, params }: Props) => {
   const query = new QueryClient()

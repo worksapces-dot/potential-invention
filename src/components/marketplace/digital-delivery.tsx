@@ -125,7 +125,7 @@ export default function DigitalDelivery({
         <CardContent className="text-center py-12">
           <Download className="h-12 w-12 mx-auto mb-4 text-[#9D9D9D]" />
           <h3 className="text-lg font-semibold mb-2">No Digital Files</h3>
-          <p className="text-[#9D9D9D]">This product doesn't include any digital downloads.</p>
+          <p className="text-[#9D9D9D]">This product doesn&apos;t include any digital downloads.</p>
         </CardContent>
       </Card>
     )

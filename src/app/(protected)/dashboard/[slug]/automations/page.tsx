@@ -3,6 +3,12 @@ import CreateAutomation from '@/components/global/create-automation'
 import { AIBuilderButton } from '@/components/global/ai-automation-builder/exports'
 import { Check, Sparkles } from 'lucide-react'
 import React from 'react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Automations',
+  description: 'Create and manage your Instagram DM and comment automations. Set up keyword triggers and AI-powered responses.',
+}
 
 type Props = {
   params: { slug: string }
@@ -17,22 +23,39 @@ const Page = ({ params }: Props) => {
       </div>
       <div className="lg:col-span-2">
         {/* AI Builder Card */}
-        <div className="flex flex-col rounded-xl bg-gradient-to-br from-[#3352CC]/10 to-[#5577FF]/10 gap-y-4 p-5 border-[1px] overflow-hidden border-[#3352CC]/30 mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3352CC] to-[#5577FF] flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-white" />
+        <div className="relative flex flex-col rounded-2xl overflow-hidden mb-5 group">
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-fuchsia-600/20" />
+          <div className="absolute inset-0 bg-[#0e0e0e]/80 backdrop-blur-xl" />
+          
+          {/* Animated Border */}
+          <div className="absolute inset-0 rounded-2xl border border-purple-500/20 group-hover:border-purple-500/40 transition-colors" />
+          
+          {/* Glow Effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
+          
+          <div className="relative p-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                  <Sparkles className="h-5 w-5 text-white" />
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0e0e0e]" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">AI Builder</h2>
+                <p className="text-white/40 text-sm">
+                  Create with natural language
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-white">AI Builder</h2>
-              <p className="text-text-secondary text-sm">
-                Create automations with plain text
-              </p>
-            </div>
+            
+            <p className="text-white/50 text-sm leading-relaxed">
+              Just describe what you want: <span className="text-purple-400">"When someone comments 'INFO', DM them my product details"</span>
+            </p>
+            
+            <AIBuilderButton slug={params.slug} />
           </div>
-          <p className="text-text-secondary text-sm">
-            Just describe what you want: "When someone comments 'INFO', DM them my product details"
-          </p>
-          <AIBuilderButton slug={params.slug} />
         </div>
 
         <div className="flex flex-col rounded-xl bg-background-80 gap-y-6 p-5 border-[1px] overflow-hidden border-in-active">

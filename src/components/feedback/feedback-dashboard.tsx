@@ -72,6 +72,7 @@ const FeedbackDashboard = () => {
   useEffect(() => {
     loadFeatures()
     loadStats()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, selectedCategory, selectedStatus, sortBy])
 
   const loadFeatures = async () => {

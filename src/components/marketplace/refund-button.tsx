@@ -84,7 +84,7 @@ export function RefundButton({ purchaseId, productName, refundableUntil }: Props
         <AlertDialogHeader>
           <AlertDialogTitle>Request Refund</AlertDialogTitle>
           <AlertDialogDescription>
-            You're requesting a refund for "{productName}". Please provide a reason below.
+            You&apos;re requesting a refund for &quot;{productName}&quot;. Please provide a reason below.
           </AlertDialogDescription>
         </AlertDialogHeader>
         

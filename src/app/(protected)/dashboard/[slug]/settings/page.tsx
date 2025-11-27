@@ -2,6 +2,12 @@ import Billing from '@/components/global/billing'
 import ReferralDashboard from '@/components/referral/referral-dashboard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import React from 'react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Settings',
+  description: 'Manage your account settings, billing, and referral program.',
+}
 
 type Props = {}
 
