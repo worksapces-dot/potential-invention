@@ -85,59 +85,65 @@ function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-border/50">
-      <div className="container mx-auto flex h-18 items-center justify-between px-4 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground transition-transform group-hover:scale-105">
-            <Zap className="h-5 w-5 text-background" fill="currentColor" />
-          </div>
-          <span className="text-xl font-bold tracking-tight">Fortress</span>
-        </Link>
+    <header className="sticky top-4 z-50 w-full px-4 lg:px-8">
+      <div className="container mx-auto rounded-2xl bg-background/70 backdrop-blur-xl border border-border/50 shadow-lg shadow-black/5">
+        <div className="flex h-16 items-center justify-between px-4 lg:px-6">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground transition-transform group-hover:scale-105">
+              <Zap className="h-4 w-4 text-background" fill="currentColor" />
+            </div>
+            <span className="text-lg font-bold tracking-tight">Fortress</span>
+          </Link>
 
-        <nav className="hidden items-center gap-10 lg:flex">
-          {["Features", "How It Works", "Use Cases", "Pricing"].map((item) => (
-            <Link
-              key={item}
-              href={`#${item.toLowerCase().replace(/ /g, "-")}`}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" className="hidden text-sm font-medium sm:inline-flex">
-            Log in
-          </Button>
-          <Button className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-6 h-11 font-medium shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
-            Get started
-          </Button>
-          <button
-            className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-      </div>
-
-      {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur-xl">
-          <nav className="container mx-auto px-4 py-6 flex flex-col gap-4">
+          <nav className="hidden items-center gap-8 lg:flex">
             {["Features", "How It Works", "Use Cases", "Pricing"].map((item) => (
               <Link
                 key={item}
                 href={`#${item.toLowerCase().replace(/ /g, "-")}`}
-                className="text-lg font-medium py-2 transition-colors hover:text-muted-foreground"
-                onClick={() => setMobileMenuOpen(false)}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 {item}
               </Link>
             ))}
           </nav>
+
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard">
+              <Button variant="ghost" className="hidden text-sm font-medium sm:inline-flex">
+                Log in
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-6 h-10 font-medium shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
+                Get started
+              </Button>
+            </Link>
+            <button
+              className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
-      )}
+
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-border/50">
+            <nav className="px-4 py-6 flex flex-col gap-4">
+              {["Features", "How It Works", "Use Cases", "Pricing"].map((item) => (
+                <Link
+                  key={item}
+                  href={`#${item.toLowerCase().replace(/ /g, "-")}`}
+                  className="text-lg font-medium py-2 transition-colors hover:text-muted-foreground"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        )}
+      </div>
     </header>
   )
 }
@@ -207,9 +213,6 @@ function HeroSection() {
             Using the system that automated 500M+ tasks across businesses...
             <br className="hidden md:block" />
             Leading to 100K+ hours saved & $2M+ in revenue generated
-            <span className="ml-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs">
-              {"👋"}
-            </span>
           </p>
 
           {/* Feature bullets */}
@@ -237,13 +240,15 @@ function HeroSection() {
 
           {/* CTA Button */}
           <div className="flex flex-col items-center gap-5 animate-slide-up delay-400">
-            <Button
-              size="lg"
-              className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-            >
-              Get started
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Button>
+            <Link href="/dashboard">
+              <Button
+                size="lg"
+                className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+              >
+                Get started
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
             <p className="text-sm md:text-base text-muted-foreground">for free. no signup. no email.</p>
           </div>
         </div>
@@ -703,13 +708,15 @@ function CtaSection() {
           </p>
 
           <div className="flex flex-col items-center gap-5">
-            <Button
-              size="lg"
-              className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-            >
-              Get Started Free
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Button>
+            <Link href="/dashboard">
+              <Button
+                size="lg"
+                className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
             <p className="text-sm md:text-base text-muted-foreground">Free plan includes 1,000 tasks/month</p>
           </div>
         </div>
