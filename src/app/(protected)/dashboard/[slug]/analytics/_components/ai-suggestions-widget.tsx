@@ -72,6 +72,7 @@ export function AIChatbotWidget({ userContext }: Props) {
                 setIsLoading(false);
             });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, userContext]);
 
     const handleSend = async () => {

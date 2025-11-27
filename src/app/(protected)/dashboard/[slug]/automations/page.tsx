@@ -51,7 +51,7 @@ const Page = ({ params }: Props) => {
             </div>
             
             <p className="text-white/50 text-sm leading-relaxed">
-              Just describe what you want: <span className="text-purple-400">"When someone comments 'INFO', DM them my product details"</span>
+              Just describe what you want: <span className="text-purple-400">&quot;When someone comments &apos;INFO&apos;, DM them my product details&quot;</span>
             </p>
             
             <AIBuilderButton slug={params.slug} />

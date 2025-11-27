@@ -56,9 +56,9 @@ export default async function ProductDetailPage({ params }: Props) {
             <p className="text-[#9D9D9D] whitespace-pre-wrap">{product.description}</p>
           </div>
 
-          {/* What's Included */}
+          {/* What&apos;s Included */}
           <div className="border-2 border-[#3352CC] rounded-2xl p-6 bg-[#1A1A1D] mt-6">
-            <h2 className="text-xl font-bold mb-4">What's Included</h2>
+            <h2 className="text-xl font-bold mb-4">What&apos;s Included</h2>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-[#9D9D9D]">
                 <Package className="h-5 w-5 text-[#3352CC]" />
@@ -154,7 +154,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 <div>
                   <p className="font-medium">{sellerName}</p>
                   <p className="text-xs text-[#9D9D9D]">
-                    ⭐ {(product.SellerProfile?.rating || 0).toFixed(1)} seller rating
+                    {(product.SellerProfile?.rating || 0).toFixed(1)} seller rating
                   </p>
                 </div>
               </div>

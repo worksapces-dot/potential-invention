@@ -105,6 +105,12 @@ function Header() {
                 {item}
               </Link>
             ))}
+            <Link
+              href="/changelog"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Changelog
+            </Link>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -140,6 +146,13 @@ function Header() {
                   {item}
                 </Link>
               ))}
+              <Link
+                href="/changelog"
+                className="text-lg font-medium py-2 transition-colors hover:text-muted-foreground"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Changelog
+              </Link>
             </nav>
           </div>
         )}

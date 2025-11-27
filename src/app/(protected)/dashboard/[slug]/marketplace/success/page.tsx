@@ -51,7 +51,7 @@ export default function PurchaseSuccessPage({ params, searchParams }: Props) {
         </div>
 
         <p className="text-sm text-[#9D9D9D] mt-8">
-          Need help? Contact our support team or check your purchase in the "My Purchases" section.
+          Need help? Contact our support team or check your purchase in the &quot;My Purchases&quot; section.
         </p>
       </div>
     </div>

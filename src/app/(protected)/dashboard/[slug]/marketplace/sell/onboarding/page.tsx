@@ -148,7 +148,7 @@ export default async function SellerOnboardingPage() {
             </Button>
           </form>
           <p className="text-sm text-[#9D9D9D] mt-6">
-            🔒 Secure connection • You'll be redirected to Stripe to complete the setup
+            🔒 Secure connection • You&apos;ll be redirected to Stripe to complete the setup
           </p>
         </div>
       </div>

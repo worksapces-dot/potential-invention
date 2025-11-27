@@ -366,6 +366,7 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
                 <div className="grid grid-cols-4 gap-2 max-h-32 overflow-y-auto">
                   {posts.map((post) => (
                     <button key={post.id} onClick={() => togglePostSelection(post.id)} className={cn("relative aspect-square rounded-lg overflow-hidden border-2 transition-all", selectedPosts.includes(post.id) ? 'border-purple-500' : 'border-transparent hover:border-white/20')}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={post.media_url} alt="" className="w-full h-full object-cover" />
                       {selectedPosts.includes(post.id) && (
                         <div className="absolute inset-0 bg-purple-500/40 flex items-center justify-center">

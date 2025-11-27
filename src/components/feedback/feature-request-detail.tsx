@@ -74,6 +74,7 @@ const FeatureRequestDetail = ({ featureId }: FeatureRequestDetailProps) => {
 
   useEffect(() => {
     loadFeature()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [featureId])
 
   const loadFeature = async () => {
