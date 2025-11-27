@@ -239,7 +239,7 @@ const ReferralDashboard = () => {
             </>
           ) : (
             <div className="text-center py-4">
-              <p className="text-text-secondary mb-4">You don't have a referral code yet</p>
+              <p className="text-text-secondary mb-4">You don&apos;t have a referral code yet</p>
               <Button
                 onClick={handleGenerateCode}
                 disabled={generating}

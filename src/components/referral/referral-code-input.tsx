@@ -92,7 +92,7 @@ const ReferralCodeInput = ({ onSuccess, className }: ReferralCodeInputProps) => 
           <div className="text-sm">
             <p className="text-light-blue font-medium">Bonus Rewards</p>
             <p className="text-text-secondary">
-              You'll get $5 credit instantly, and the person who referred you gets $10. 
+              You&apos;ll get $5 credit instantly, and the person who referred you gets $10. 
               You can only use one referral code per account.
             </p>
           </div>

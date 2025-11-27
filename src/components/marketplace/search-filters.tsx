@@ -127,7 +127,7 @@ export default function SearchFilters() {
             <span className="text-sm text-[#9D9D9D]">Active filters:</span>
             {search && (
               <span className="px-3 py-1 bg-[#3352CC]/20 text-[#3352CC] rounded-full text-sm">
-                "{search}"
+                &quot;{search}&quot;
               </span>
             )}
             {category !== 'all' && (

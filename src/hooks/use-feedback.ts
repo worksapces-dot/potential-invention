@@ -95,6 +95,7 @@ export const useFeedback = (params: UseFeatureRequestsParams = {}) => {
   useEffect(() => {
     loadFeatures()
     loadStats()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.page, params.category, params.status, params.sortBy])
 
   return {
