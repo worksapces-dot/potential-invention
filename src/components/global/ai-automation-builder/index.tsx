@@ -68,14 +68,13 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoVor: 'smooth' })
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
   useEffect(() => {
     scrollToBottom()
   }, [messages, streamingText])
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
@@ -118,9 +117,9 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
     if (sendMatch) responseMessage = sendMatch[1]
     else if (replyMatch) responseMessage = replyMatch[1]
     else if (dmMatch) responseMessage = dmMatch[1]
-    else responseMessage = 'Thanks for reaching out! I\'ll get back to you soon.'
+    else responseMessage = 'Thanks for reaching out!'
 
-    const name = `AI Generated: ${keywords[0]} Automation`
+    const name = `AI: ${keywords[0]} Automation`
 
     return {
       name,
@@ -128,10 +127,10 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
       keywords,
       listenerType: useSmartAI ? 'SMARTAI' : 'MESSAGE',
       prompt: useSmartAI 
-        ? `You are a helpful assistant. Respond to messages about: ${responseMessage}. Be friendly and professional.`
+        ? `You are a helpful assistant. ${responseMessage}. Be friendly and professional.`
         : responseMessage,
       commentReply: triggers.includes('COMMENT') 
-        ? `Thanks for your interest! Check your DMs 📩`
+        ? `Thanks! Check your DMs 📩`
         : undefined
     }
   }
@@ -142,7 +141,7 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
     
     const words = text.split(' ')
     for (let i = 0; i < words.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 30 + Math.random() * 20))
+      await new Promise(resolve => setTimeout(resolve, 30))
       setStreamingText(prev => prev + (i === 0 ? '' : ' ') + words[i])
     }
     
@@ -160,18 +159,17 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
     setParsedAutomation(null)
 
     try {
-      // Simulate thinking delay
       await new Promise(resolve => setTimeout(resolve, 800))
       
       const parsed = await parseUserPrompt(userMessage)
       
-      const responseText = `I've analyzed your request and created an automation:\n\n` +
+      const responseText = `I've created an automation for you:\n\n` +
         `**${parsed.name}**\n\n` +
-        `• **Triggers:** ${parsed.triggers.join(' & ')}\n` +
-        `• **Keywords:** ${parsed.keywords.map(k => `"${k}"`).join(', ')}\n` +
-        `• **Response Type:** ${parsed.listenerType === 'SMARTAI' ? '🤖 Smart AI' : '💬 Fixed Message'}\n` +
-        `• **Message:** "${parsed.prompt.substring(0, 100)}${parsed.prompt.length > 100 ? '...' : ''}"\n` +
-        (parsed.commentReply ? `• **Comment Reply:** "${parsed.commentReply}"` : '')
+        `• Triggers: ${parsed.triggers.join(' & ')}\n` +
+        `• Keywords: ${parsed.keywords.map(k => `"${k}"`).join(', ')}\n` +
+        `• Type: ${parsed.listenerType === 'SMARTAI' ? '🤖 Smart AI' : '💬 Message'}\n` +
+        `• Response: "${parsed.prompt.substring(0, 80)}..."` +
+        (parsed.commentReply ? `\n• Comment: "${parsed.commentReply}"` : '')
 
       await simulateStreaming(responseText)
       
@@ -183,7 +181,7 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
         setShowPostSelector(true)
       }
     } catch (error) {
-      toast.error('Failed to parse automation. Please try again.')
+      toast.error('Failed to parse. Try again.')
       setStreamingText('')
     } finally {
       setIsProcessing(false)
@@ -193,11 +191,8 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
   const handleConfirm = () => {
     if (parsedAutomation) {
       onAutomationCreated?.(parsedAutomation)
-      toast.success('Automation created successfully!')
-      setParsedAutomation(null)
-      setMessages([])
-      setSelectedPosts([])
-      setShowPostSelector(false)
+      toast.success('Automation created!')
+      handleReset()
     }
   }
 
@@ -217,9 +212,9 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
     )
   }
 
-  const copyToClipboard = (text: string) => {
+  const copyText = (text: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('Copied to clipboard')
+    toast.success('Copied!')
   }
 
   return (
@@ -241,7 +236,7 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
         
         <div className="flex items-center gap-2">
           {isPro && (
-            <Badge className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-400 border border-amber-500/20 text-xs">
+            <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs">
               <Crown className="h-3 w-3 mr-1" />
               Pro
             </Badge>
@@ -260,28 +255,26 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
         </div>
       </div>
 
-      {/* Messages Area */}
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         {messages.length === 0 && !isProcessing && !streamingText && (
           <div className="flex flex-col items-center justify-center h-full px-6 py-12">
-            {/* Logo */}
             <div className="relative mb-8">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 flex items-center justify-center shadow-2xl shadow-purple-500/30">
                 <Sparkles className="h-8 w-8 text-white" />
               </div>
               <motion.div
-                className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 opacity-20 blur-xl"
+                className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-violet-500 to-fuchsia-500 opacity-20 blur-xl"
                 animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.3, 0.2] }}
                 transition={{ duration: 3, repeat: Infinity }}
               />
             </div>
 
-            <h1 className="text-2xl font-semibold text-white mb-2">How can I help you today?</h1>
+            <h1 className="text-2xl font-semibold text-white mb-2">How can I help?</h1>
             <p className="text-white/40 text-center mb-8 max-w-md">
-              Describe your automation in plain English and I&apos;ll create it for you.
+              Describe your automation in plain English.
             </p>
             
-            {/* Example Prompts Grid */}
             <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
               {examplePrompts.map((example, i) => (
                 <motion.button
@@ -293,7 +286,7 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
                   className="group p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 transition-all text-left"
                 >
                   <span className="text-2xl mb-2 block">{example.icon}</span>
-                  <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">
+                  <span className="text-sm text-white/60 group-hover:text-white/80">
                     {example.text}
                   </span>
                 </motion.button>
@@ -302,7 +295,6 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
           </div>
         )}
 
-        {/* Chat Messages */}
         <div className="px-6 py-4 space-y-6">
           <AnimatePresence>
             {messages.map((message, i) => (
@@ -310,60 +302,26 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
                 className="group"
               >
                 {message.role === 'user' ? (
-                  // User Message
                   <div className="flex justify-end">
-                    <div className="max-w-[85%] bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl rounded-tr-md px-4 py-3 shadow-lg shadow-purple-500/10">
-                      <p className="text-sm text-white whitespace-pre-wrap">{message.content}</p>
+                    <div className="max-w-[85%] bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl rounded-tr-md px-4 py-3 shadow-lg">
+                      <p className="text-sm text-white">{message.content}</p>
                     </div>
                   </div>
                 ) : (
-                  // Assistant Message
                   <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0">
                       <Sparkles className="h-4 w-4 text-white" />
                     </div>
-                    <div className="flex-1 space-y-3">
+                    <div className="flex-1 space-y-2">
                       <div className="bg-white/[0.03] border border-white/5 rounded-2xl rounded-tl-md px-4 py-3">
-                        <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
-                          {message.content.split('\n').map((line, idx) => {
-                            if (line.startsWith('**') && line.endsWith('**')) {
-                              return <strong key={idx} className="text-white block mb-1">{line.replace(/\*\*/g, '')}</strong>
-                            }
-                            if (line.startsWith('•')) {
-                              return <span key={idx} className="block text-white/60">{line}</span>
-                            }
-                            return <span key={idx}>{line}<br/></span>
-                          })}
-                        </p>
+                        <p className="text-sm text-white/80 whitespace-pre-wrap">{message.content}</p>
                       </div>
-                      
-                      {/* Message Actions */}
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard(message.content)}
-                          className="h-7 px-2 text-white/30 hover:text-white hover:bg-white/5"
-                        >
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="sm" onClick={() => copyText(message.content)} className="h-7 px-2 text-white/30 hover:text-white hover:bg-white/5">
                           <Copy className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-white/30 hover:text-white hover:bg-white/5"
-                        >
-                          <ThumbsUp className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-white/30 hover:text-white hover:bg-white/5"
-                        >
-                          <ThumbsDown className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -373,39 +331,23 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
             ))}
           </AnimatePresence>
 
-          {/* Streaming Response */}
           {(isProcessing || streamingText) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex gap-3"
-            >
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <div className="flex-1">
                 <div className="bg-white/[0.03] border border-white/5 rounded-2xl rounded-tl-md px-4 py-3">
                   {streamingText ? (
-                    <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
+                    <p className="text-sm text-white/80 whitespace-pre-wrap">
                       {streamingText}
-                      <motion.span
-                        animate={{ opacity: [1, 0] }}
-                        transition={{ duration: 0.5, repeat: Infinity }}
-                        className="inline-block w-2 h-4 bg-purple-400 ml-0.5 rounded-sm"
-                      />
+                      <motion.span animate={{ opacity: [1, 0] }} transition={{ duration: 0.5, repeat: Infinity }} className="inline-block w-2 h-4 bg-purple-400 ml-0.5 rounded-sm" />
                     </p>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        {[0, 1, 2].map((i) => (
-                          <motion.div
-                            key={i}
-                            className="w-2 h-2 rounded-full bg-purple-400"
-                            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                            transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                          />
-                        ))}
-                      </div>
+                      {[0, 1, 2].map((i) => (
+                        <motion.div key={i} className="w-2 h-2 rounded-full bg-purple-400" animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
+                      ))}
                       <span className="text-sm text-white/40">Thinking...</span>
                     </div>
                   )}
@@ -414,36 +356,17 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
             </motion.div>
           )}
 
-          {/* Post Selector */}
           {showPostSelector && posts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="ml-11"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="ml-11">
               <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <ImageIcon className="h-4 w-4 text-purple-400" />
-                  <span className="text-sm font-medium text-white">Select posts for this automation</span>
+                  <span className="text-sm font-medium text-white">Select posts</span>
                 </div>
                 <div className="grid grid-cols-4 gap-2 max-h-32 overflow-y-auto">
                   {posts.map((post) => (
-                    <button
-                      key={post.id}
-                      onClick={() => togglePostSelection(post.id)}
-                      className={cn(
-                        "relative aspect-square rounded-lg overflow-hidden border-2 transition-all",
-                        selectedPosts.includes(post.id) 
-                          ? 'border-purple-500 ring-2 ring-purple-500/20' 
-                          : 'border-transparent hover:border-white/20'
-                      )}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img 
-                        src={post.media_url} 
-                        alt={post.caption || 'Post'} 
-                        className="w-full h-full object-cover"
-                      />
+                    <button key={post.id} onClick={() => togglePostSelection(post.id)} className={cn("relative aspect-square rounded-lg overflow-hidden border-2 transition-all", selectedPosts.includes(post.id) ? 'border-purple-500' : 'border-transparent hover:border-white/20')}>
+                      <img src={post.media_url} alt="" className="w-full h-full object-cover" />
                       {selectedPosts.includes(post.id) && (
                         <div className="absolute inset-0 bg-purple-500/40 flex items-center justify-center">
                           <Check className="h-5 w-5 text-white" />
@@ -456,25 +379,13 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
             </motion.div>
           )}
 
-          {/* Confirmation Buttons */}
           {parsedAutomation && !isProcessing && !isStreaming && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center justify-center gap-3 pt-4"
-            >
-              <Button
-                onClick={handleReset}
-                variant="outline"
-                className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
-              >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-center gap-3 pt-4">
+              <Button onClick={handleReset} variant="outline" className="border-white/10 bg-white/5 hover:bg-white/10 text-white">
                 <X className="h-4 w-4 mr-2" />
                 Start Over
               </Button>
-              <Button
-                onClick={handleConfirm}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-purple-500/20"
-              >
+              <Button onClick={handleConfirm} className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-purple-500/20">
                 <Check className="h-4 w-4 mr-2" />
                 Create Automation
               </Button>
@@ -485,80 +396,52 @@ const AIAutomationBuilder = ({ onAutomationCreated, posts = [] }: AIAutomationBu
         </div>
       </div>
 
-      {/* Input Area */}
+      {/* Input */}
       <div className="p-4 border-t border-white/5">
         <div className="max-w-3xl mx-auto">
-          <div className="relative">
-            <div className={cn(
-              "flex items-end gap-2 p-2 rounded-2xl border transition-all duration-200",
-              "bg-white/[0.03] border-white/10",
-              "focus-within:border-purple-500/50 focus-within:bg-white/[0.05]"
-            )}>
-              {/* Attachment Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 text-white/30 hover:text-white hover:bg-white/5 rounded-xl flex-shrink-0"
-              >
-                <Paperclip className="h-4 w-4" />
+          <div className={cn("flex items-end gap-2 p-2 rounded-2xl border transition-all", "bg-white/[0.03] border-white/10", "focus-within:border-purple-500/50 focus-within:bg-white/[0.05]")}>
+            <Button variant="ghost" size="icon" className="h-9 w-9 text-white/30 hover:text-white hover:bg-white/5 rounded-xl flex-shrink-0">
+              <Paperclip className="h-4 w-4" />
+            </Button>
+            
+            <Textarea
+              ref={textareaRef}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe your automation..."
+              className="flex-1 bg-transparent border-0 resize-none focus:ring-0 focus-visible:ring-0 text-white placeholder:text-white/30 min-h-[36px] max-h-[200px] py-2 px-1 text-sm"
+              rows={1}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSubmit()
+                }
+              }}
+            />
+            
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button variant="ghost" size="sm" className="h-8 px-3 text-white/40 hover:text-white hover:bg-white/5 rounded-xl text-xs gap-1">
+                <div className="w-4 h-4 rounded bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                  <span className="text-[8px] font-bold text-white">AI</span>
+                </div>
+                Slide AI
+                <ChevronDown className="h-3 w-3" />
               </Button>
               
-              {/* Textarea */}
-              <Textarea
-                ref={textareaRef}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe your automation..."
-                className="flex-1 bg-transparent border-0 resize-none focus:ring-0 focus-visible:ring-0 text-white placeholder:text-white/30 min-h-[36px] max-h-[200px] py-2 px-1 text-sm"
-                rows={1}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmit()
-                  }
-                }}
-              />
-              
-              {/* Model Selector */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-3 text-white/40 hover:text-white hover:bg-white/5 rounded-xl text-xs gap-1"
-                >
-                  <div className="w-4 h-4 rounded bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-white">AI</span>
-                  </div>
-                  Slide AI
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-                
-                {/* Send Button */}
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!prompt.trim() || isProcessing}
-                  size="icon"
-                  className={cn(
-                    "h-9 w-9 rounded-xl transition-all duration-200",
-                    prompt.trim() && !isProcessing
-                      ? "bg-white text-black hover:bg-white/90"
-                      : "bg-white/10 text-white/30 cursor-not-allowed"
-                  )}
-                >
-                  {isProcessing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ArrowUp className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
+              <Button
+                onClick={handleSubmit}
+                disabled={!prompt.trim() || isProcessing}
+                size="icon"
+                className={cn("h-9 w-9 rounded-xl transition-all", prompt.trim() && !isProcessing ? "bg-white text-black hover:bg-white/90" : "bg-white/10 text-white/30 cursor-not-allowed")}
+              >
+                {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
+              </Button>
             </div>
-            
-            {/* Footer Text */}
-            <p className="text-[10px] text-white/20 text-center mt-2">
-              Slide AI can make mistakes. Review your automation before activating.
-            </p>
           </div>
+          
+          <p className="text-[10px] text-white/20 text-center mt-2">
+            Slide AI can make mistakes. Review before activating.
+          </p>
         </div>
       </div>
     </div>
