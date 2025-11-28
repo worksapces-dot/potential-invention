@@ -1,10 +1,12 @@
 'use client'
-import { onOAuthInstagram } from '@/actions/integrations'
+import { onOAuthInstagram, onDisconnectInstagram } from '@/actions/integrations'
 import { onUserInfo } from '@/actions/user'
 import { Button } from '@/components/ui/button'
-import { useQuery } from '@tanstack/react-query'
-import React from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 
 type Props = {
   title: string
@@ -15,15 +17,33 @@ type Props = {
 
 const IntegrationCard = ({ description, icon, strategy, title }: Props) => {
   const router = useRouter()
+  const queryClient = useQueryClient()
+  const [isDisconnecting, setIsDisconnecting] = useState(false)
 
   const onInstaOAuth = () => {
     if (strategy === 'MARKETPLACE') {
-      // Get current slug from URL
       const pathParts = window.location.pathname.split('/')
-      const slug = pathParts[2] // /dashboard/[slug]/...
+      const slug = pathParts[2]
       router.push(`/dashboard/${slug}/marketplace/sell/onboarding`)
     } else {
       onOAuthInstagram(strategy)
+    }
+  }
+
+  const handleDisconnect = async () => {
+    setIsDisconnecting(true)
+    try {
+      const result = await onDisconnectInstagram()
+      if (result.status === 200) {
+        toast.success('Instagram disconnected')
+        queryClient.invalidateQueries({ queryKey: ['user-profile'] })
+      } else {
+        toast.error('Failed to disconnect')
+      }
+    } catch {
+      toast.error('Something went wrong')
+    } finally {
+      setIsDisconnecting(false)
     }
   }
 
@@ -36,20 +56,56 @@ const IntegrationCard = ({ description, icon, strategy, title }: Props) => {
     (integration) => integration.name === strategy
   )
 
+  // Check if token is expired
+  const isExpired = integrated?.expiresAt 
+    ? new Date(integrated.expiresAt).getTime() < Date.now() 
+    : false
+
   return (
     <div className="border-2 border-[#3352CC] rounded-2xl gap-x-5 p-5 flex items-center justify-between">
       {icon}
       <div className="flex flex-col flex-1">
-        <h3 className="text-xl"> {title}</h3>
-        <p className="text-[#9D9D9D] text-base ">{description}</p>
+        <h3 className="text-xl">{title}</h3>
+        <p className="text-[#9D9D9D] text-base">{description}</p>
+        {integrated && isExpired && (
+          <p className="text-red-500 text-sm mt-1">⚠️ Token expired - please reconnect</p>
+        )}
       </div>
-      <Button
-        onClick={onInstaOAuth}
-        disabled={strategy !== 'MARKETPLACE' && integrated?.name === strategy}
-        className="bg-gradient-to-br text-white rounded-full text-lg from-[#3352CC] font-medium to-[#1C2D70] hover:opacity-70 transition duration-100"
-      >
-        {strategy === 'MARKETPLACE' ? 'Get Started' : integrated ? 'Connected' : 'Connect'}
-      </Button>
+      
+      {strategy === 'MARKETPLACE' ? (
+        <Button
+          onClick={onInstaOAuth}
+          className="bg-gradient-to-br text-white rounded-full text-lg from-[#3352CC] font-medium to-[#1C2D70] hover:opacity-70 transition duration-100"
+        >
+          Get Started
+        </Button>
+      ) : integrated ? (
+        <div className="flex gap-2">
+          {isExpired && (
+            <Button
+              onClick={onInstaOAuth}
+              className="bg-gradient-to-br text-white rounded-full from-[#3352CC] font-medium to-[#1C2D70] hover:opacity-70"
+            >
+              Reconnect
+            </Button>
+          )}
+          <Button
+            onClick={handleDisconnect}
+            disabled={isDisconnecting}
+            variant="outline"
+            className="rounded-full border-red-500/50 text-red-500 hover:bg-red-500/10"
+          >
+            {isDisconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Disconnect'}
+          </Button>
+        </div>
+      ) : (
+        <Button
+          onClick={onInstaOAuth}
+          className="bg-gradient-to-br text-white rounded-full text-lg from-[#3352CC] font-medium to-[#1C2D70] hover:opacity-70 transition duration-100"
+        >
+          Connect
+        </Button>
+      )}
     </div>
   )
 }

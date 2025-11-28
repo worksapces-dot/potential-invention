@@ -133,9 +133,25 @@ export const generateTokens = async (code: string) => {
 }
 
 export const getUserProfile = async (token: string) => {
-  const response = await axios.get(
-    `${process.env.INSTAGRAM_BASE_URL}/me?fields=id,username,media_count,account_type,followers_count&access_token=${token}`
-  )
-
-  return response.data
+  try {
+    // Try with followers_count first (requires business/creator account)
+    const response = await axios.get(
+      `${process.env.INSTAGRAM_BASE_URL}/me?fields=id,username,media_count,account_type,followers_count&access_token=${token}`
+    )
+    return response.data
+  } catch (error: any) {
+    console.log('🔴 getUserProfile error with followers_count:', error?.response?.data)
+    
+    // Fallback without followers_count for personal accounts
+    try {
+      const fallbackResponse = await axios.get(
+        `${process.env.INSTAGRAM_BASE_URL}/me?fields=id,username,media_count,account_type&access_token=${token}`
+      )
+      console.log('🟡 getUserProfile fallback response:', fallbackResponse.data)
+      return fallbackResponse.data
+    } catch (fallbackError: any) {
+      console.log('🔴 getUserProfile fallback also failed:', fallbackError?.response?.data)
+      throw fallbackError
+    }
+  }
 }

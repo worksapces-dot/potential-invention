@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
 const SYSTEM_PROMPT = `You are Slide's friendly AI assistant on the landing page. You help visitors learn about Slide - an Instagram DM automation platform.
 
 About Slide:
@@ -27,11 +23,27 @@ Always encourage visitors to try Slide for free!`
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json()
+    // Check for API key (supports both OPEN_AI_KEY and OPENAI_API_KEY)
+    const apiKey = process.env.OPEN_AI_KEY || process.env.OPENAI_API_KEY
+    
+    if (!apiKey) {
+      console.error("OpenAI API key is not set")
+      return NextResponse.json(
+        { error: "Chat service not configured", reply: "Sorry, the chat service is not available right now. Please try again later!" },
+        { status: 500 }
+      )
+    }
+
+    const openai = new OpenAI({
+      apiKey: apiKey,
+    })
+
+    const body = await req.json()
+    const { messages } = body
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
-        { error: "Messages are required" },
+        { error: "Messages are required", reply: "Something went wrong. Please try again!" },
         { status: 400 }
       )
     }
@@ -40,7 +52,7 @@ export async function POST(req: NextRequest) {
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        ...messages.slice(-10), // Keep last 10 messages for context
+        ...messages.slice(-10),
       ],
       max_tokens: 200,
       temperature: 0.7,
@@ -52,7 +64,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Chat API error:", error)
     return NextResponse.json(
-      { error: "Failed to get response" },
+      { error: "Failed to get response", reply: "Oops! Something went wrong. Please try again." },
       { status: 500 }
     )
   }

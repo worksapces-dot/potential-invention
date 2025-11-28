@@ -4,30 +4,38 @@ import ThenNode from '@/components/global/automations/then/node'
 import Trigger from '@/components/global/automations/trigger'
 import AutomationsBreadCrumb from '@/components/global/bread-crumbs/automations'
 import { Warning } from '@/icons'
-import { PrefetchUserAutomation } from '@/react-query/prefetch'
-
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query'
-
-import React from 'react'
+import { cache } from 'react'
 
 type Props = {
   params: { id: string }
 }
 
+// Cache the automation fetch to avoid duplicate calls
+const getCachedAutomation = cache(async (id: string) => {
+  return getAutomationInfo(id)
+})
+
 export async function generateMetadata({ params }: { params: { id: string } }) {
-  const info = await getAutomationInfo(params.id)
+  const info = await getCachedAutomation(params.id)
   return {
-    title: info.data?.name,
+    title: info.data?.name || 'Automation',
   }
 }
 
 const Page = async ({ params }: Props) => {
   const query = new QueryClient()
-  await PrefetchUserAutomation(query, params.id)
+  
+  // Use cached version
+  await query.prefetchQuery({
+    queryKey: ['automation-info'],
+    queryFn: () => getCachedAutomation(params.id),
+    staleTime: 60000,
+  })
 
   return (
     <HydrationBoundary state={dehydrate(query)}>

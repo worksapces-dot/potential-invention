@@ -56,3 +56,10 @@ export const createIntegration = async (
     },
   })
 }
+
+
+export const deleteIntegration = async (id: string) => {
+  return await client.integrations.delete({
+    where: { id },
+  })
+}

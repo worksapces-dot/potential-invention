@@ -13,6 +13,27 @@ export const onOAuthInstagram = (strategy: 'INSTAGRAM' | 'CRM') => {
   }
 }
 
+export const onDisconnectInstagram = async () => {
+  const user = await onCurrentUser()
+
+  try {
+    const integration = await getIntegration(user.id)
+    
+    if (!integration || integration.integrations.length === 0) {
+      return { status: 404 }
+    }
+
+    const { deleteIntegration } = await import('./queries')
+    await deleteIntegration(integration.integrations[0].id)
+    
+    return { status: 200 }
+  } catch (error) {
+    console.log('🔴 Disconnect error:', error)
+    Sentry.captureException(error)
+    return { status: 500 }
+  }
+}
+
 export const onIntegrate = async (code: string) => {
   const user = await onCurrentUser()
 
