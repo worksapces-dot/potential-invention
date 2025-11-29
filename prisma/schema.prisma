@@ -45,6 +45,11 @@ model User {
   featureRequests  FeatureRequest[]
   featureVotes     FeatureVote[]
   featureComments  FeatureComment[]
+  
+  // Stripe Connect (for Cold Call payouts)
+  stripeConnectId       String?   @unique
+  stripeConnectEnabled  Boolean   @default(false)
+  stripeOnboardingComplete Boolean @default(false)
 }
 
 
@@ -490,4 +495,135 @@ enum FeaturePriority {
 enum VoteType {
   UPVOTE
   DOWNVOTE
+}
+
+// ============================================================================
+// COLD CALL MODELS
+// ============================================================================
+
+model ColdCallLead {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  // Business info
+  businessName    String
+  category        String          // restaurant, salon, plumber, etc.
+  address         String?
+  city            String
+  state           String?
+  country         String
+  phone           String?
+  email           String?
+  
+  // Online presence
+  website         String?         // null = no website (our target!)
+  googleMapsUrl   String?
+  yelpUrl         String?
+  
+  // Reviews & ratings
+  rating          Float?          // Google/Yelp rating
+  reviewCount     Int?
+  
+  // Status tracking
+  status          LeadStatus      @default(NEW)
+  
+  // Owner
+  userId          String          @db.Uuid
+  
+  // Generated website preview
+  generatedWebsite GeneratedWebsite?
+  
+  // Outreach history
+  outreachEmails  OutreachEmail[]
+  
+  // Deal info
+  deal            ColdCallDeal?
+  
+  // Notes
+  notes           String?         @db.Text
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+  @@index([city])
+}
+
+model GeneratedWebsite {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  ColdCallLead    ColdCallLead    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId          String          @unique @db.Uuid
+  
+  // Website content
+  template        String          // restaurant, salon, etc.
+  previewUrl      String?         // shareable preview link
+  content         Json            // stored website config/content
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model OutreachEmail {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  ColdCallLead    ColdCallLead    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId          String          @db.Uuid
+  
+  // Email details
+  subject         String
+  body            String          @db.Text
+  sentAt          DateTime?
+  
+  // Tracking
+  opened          Boolean         @default(false)
+  openedAt        DateTime?
+  clicked         Boolean         @default(false)
+  clickedAt       DateTime?
+  replied         Boolean         @default(false)
+  repliedAt       DateTime?
+  
+  createdAt       DateTime        @default(now())
+  
+  @@index([leadId])
+}
+
+model ColdCallDeal {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  ColdCallLead    ColdCallLead    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId          String          @unique @db.Uuid
+  
+  // Deal info
+  amount          Int             // in cents
+  platformFee     Int             // our cut
+  sellerPayout    Int             // user's cut
+  
+  // Stripe
+  stripeInvoiceId String?         @unique
+  stripePaymentId String?         @unique
+  
+  status          DealStatus      @default(PENDING)
+  
+  paidAt          DateTime?
+  createdAt       DateTime        @default(now())
+  
+  @@index([status])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  NEGOTIATING
+  WON
+  LOST
+}
+
+enum DealStatus {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
 }

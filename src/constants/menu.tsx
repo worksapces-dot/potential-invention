@@ -5,6 +5,7 @@ import {
   SettingsDuoToneWhite,
   BarDuoToneBlue,
   BriefCaseDuoToneWhite,
+  PhoneCallDuoToneWhite,
 } from '@/icons'
 import { Lightbulb } from 'lucide-react'
 import { v4 as uuid } from 'uuid'
@@ -43,6 +44,11 @@ export const SIDEBAR_MENU: SideBarProps[] = [
     id: uuid(),
     label: 'marketplace',
     icon: <BriefCaseDuoToneWhite />,
+  },
+  {
+    id: uuid(),
+    label: 'cold-call',
+    icon: <PhoneCallDuoToneWhite />,
   },
   {
     id: uuid(),

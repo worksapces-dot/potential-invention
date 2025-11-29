@@ -12,7 +12,7 @@ type Props = {
   title: string
   description: string
   icon: React.ReactNode
-  strategy: 'INSTAGRAM' | 'CRM' | 'MARKETPLACE'
+  strategy: 'INSTAGRAM' | 'CRM' | 'MARKETPLACE' | 'STRIPE_CONNECT'
 }
 
 const IntegrationCard = ({ description, icon, strategy, title }: Props) => {
@@ -20,11 +20,26 @@ const IntegrationCard = ({ description, icon, strategy, title }: Props) => {
   const queryClient = useQueryClient()
   const [isDisconnecting, setIsDisconnecting] = useState(false)
 
-  const onInstaOAuth = () => {
+  const onInstaOAuth = async () => {
     if (strategy === 'MARKETPLACE') {
       const pathParts = window.location.pathname.split('/')
       const slug = pathParts[2]
       router.push(`/dashboard/${slug}/marketplace/sell/onboarding`)
+    } else if (strategy === 'STRIPE_CONNECT') {
+      // Handle Stripe Connect
+      try {
+        const response = await fetch('/api/stripe/connect/onboard', {
+          method: 'POST',
+        })
+        const data = await response.json()
+        if (response.ok && data.url) {
+          window.location.href = data.url
+        } else {
+          toast.error('Failed to connect Stripe')
+        }
+      } catch (error) {
+        toast.error('Failed to connect Stripe')
+      }
     } else {
       onOAuthInstagram(strategy)
     }
@@ -52,14 +67,28 @@ const IntegrationCard = ({ description, icon, strategy, title }: Props) => {
     queryFn: onUserInfo,
   })
 
-  const integrated = data?.data?.integrations.find(
-    (integration) => integration.name === strategy
-  )
+  // Check Stripe Connect status
+  const { data: stripeStatus } = useQuery({
+    queryKey: ['stripe-connect-status'],
+    queryFn: async () => {
+      if (strategy !== 'STRIPE_CONNECT') return null
+      const res = await fetch('/api/stripe/connect/status')
+      return res.json()
+    },
+    enabled: strategy === 'STRIPE_CONNECT',
+  })
+
+  const integrated = strategy === 'STRIPE_CONNECT'
+    ? stripeStatus?.connected
+    : data?.data?.integrations.find((integration) => integration.name === strategy)
 
   // Check if token is expired
   const isExpired = integrated?.expiresAt 
     ? new Date(integrated.expiresAt).getTime() < Date.now() 
     : false
+  
+  // For Stripe, check if onboarding is complete
+  const stripeNeedsOnboarding = strategy === 'STRIPE_CONNECT' && stripeStatus?.connected && !stripeStatus?.onboardingComplete
 
   return (
     <div className="border-2 border-[#3352CC] rounded-2xl gap-x-5 p-5 flex items-center justify-between">
