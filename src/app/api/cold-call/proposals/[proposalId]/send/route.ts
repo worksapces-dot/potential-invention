@@ -3,8 +3,6 @@ import { currentUser } from '@clerk/nextjs/server'
 import { client } from '@/lib/prisma'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(
   req: NextRequest,
   { params }: { params: { proposalId: string } }
@@ -50,6 +48,7 @@ export async function POST(
     const businessName = proposal.ColdCallDeal.ColdCallLead.businessName
 
     // Send email
+    const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
       from: 'Slide <noreply@slide.so>',
       to: proposal.clientEmail,

@@ -116,6 +116,7 @@ export async function POST(req: NextRequest) {
           currency: 'USD',
         }).format(cents / 100)
 
+      const resend = new Resend(process.env.RESEND_API_KEY)
       await resend.emails.send({
         from: 'Slide <noreply@slide.so>',
         to: clientEmail,

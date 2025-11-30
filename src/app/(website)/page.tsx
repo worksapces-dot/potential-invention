@@ -171,96 +171,131 @@ function HeroSection() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-muted/50 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-muted/50 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl" />
       </div>
 
       <div className="container relative mx-auto px-4 lg:px-8">
         <div className="mx-auto max-w-5xl text-center">
-          {/* Top badge */}
-          <div className="mb-8 md:mb-12 animate-fade-in">
-            <span className="inline-flex items-center gap-2 rounded-full bg-muted px-5 py-2.5 text-sm font-medium text-foreground">
+          {/* Top badges */}
+          <div className="mb-8 md:mb-10 flex flex-wrap items-center justify-center gap-3 animate-fade-in">
+            <span className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-medium text-foreground">
               <Sparkles className="h-4 w-4" />
-              Instagram DM Automation
+              DM Automation
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 px-4 py-2 text-sm font-medium text-foreground">
+              <Target className="h-4 w-4 text-blue-500" />
+              Cold Calling AI
             </span>
           </div>
 
           {/* Main headline */}
           <div className="mb-8 md:mb-10">
             <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.1] animate-slide-up">
-              Turn comments into
+              Find clients.
+              <br />
+              <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                Close deals.
+              </span>
             </h1>
 
             {/* Pills with floating icons inline */}
-            <div className="mt-4 md:mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4 lg:gap-5 animate-slide-up delay-100">
-              {/* Comment icon - animated floating */}
+            <div className="mt-6 md:mt-8 flex flex-wrap items-center justify-center gap-3 md:gap-4 lg:gap-5 animate-slide-up delay-100">
+              {/* Building icon - animated floating */}
               <div className="hidden sm:block animate-float">
-                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-background shadow-2xl border border-border/50 transition-all duration-300 hover:scale-110 hover:shadow-3xl">
-                  <MessageCircle className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-foreground transition-transform hover:scale-110" />
+                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-2xl shadow-blue-500/25 transition-all duration-300 hover:scale-110">
+                  <Building2 className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-white" />
                 </div>
               </div>
 
-              {/* DMs pill */}
+              {/* Leads pill */}
               <span className="inline-flex items-center gap-2 md:gap-3 rounded-full bg-foreground px-5 py-2.5 md:px-7 md:py-3.5 text-background shadow-xl">
-                <Send className="h-4 w-4 md:h-5 md:w-5" />
-                <span className="text-xl md:text-2xl lg:text-3xl font-bold">DMs</span>
+                <Users className="h-4 w-4 md:h-5 md:w-5" />
+                <span className="text-xl md:text-2xl lg:text-3xl font-bold">Leads</span>
               </span>
 
-              <span className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold">&</span>
+              <span className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold">→</span>
 
-              {/* Sales pill */}
-              <span className="inline-flex items-center gap-2 md:gap-3 rounded-full bg-foreground px-5 py-2.5 md:px-7 md:py-3.5 text-background shadow-xl">
+              {/* Clients pill */}
+              <span className="inline-flex items-center gap-2 md:gap-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-2.5 md:px-7 md:py-3.5 text-white shadow-xl shadow-purple-500/25">
                 <TrendingUp className="h-4 w-4 md:h-5 md:w-5" />
-                <span className="text-xl md:text-2xl lg:text-3xl font-bold">Sales</span>
+                <span className="text-xl md:text-2xl lg:text-3xl font-bold">Clients</span>
               </span>
 
-              {/* Instagram icon - animated floating with delay */}
+              {/* Globe icon - animated floating with delay */}
               <div className="hidden sm:block animate-float-reverse" style={{ animationDelay: "0.5s" }}>
-                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-background shadow-2xl border border-border/50 transition-all duration-300 hover:scale-110 hover:shadow-3xl">
-                  <InstagramIcon className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 transition-transform hover:scale-110" />
+                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-2xl shadow-purple-500/25 transition-all duration-300 hover:scale-110">
+                  <Rocket className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-white" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Subtitle */}
-          <p className="mx-auto mb-10 md:mb-12 max-w-2xl text-lg md:text-xl lg:text-2xl italic text-muted-foreground leading-relaxed animate-slide-up delay-200">
-            Automate your Instagram DMs with AI-powered responses.
+          <p className="mx-auto mb-10 md:mb-12 max-w-3xl text-lg md:text-xl lg:text-2xl text-muted-foreground leading-relaxed animate-slide-up delay-200">
+            AI-powered cold calling that finds local businesses without websites,
             <br className="hidden md:block" />
-            Reply to comments, capture leads, and grow your business 24/7.
+            generates stunning previews, and helps you close deals on autopilot.
           </p>
 
-          {/* Feature bullets */}
+          {/* Feature bullets - Cold Call focused */}
           <div className="mb-10 md:mb-14 animate-slide-up delay-300">
-            <p className="mb-5 text-sm text-muted-foreground tracking-wider uppercase">What you get...</p>
+            <p className="mb-5 text-sm text-muted-foreground tracking-wider uppercase">Everything you need to grow...</p>
             <div className="flex flex-wrap items-center justify-center gap-x-5 md:gap-x-8 gap-y-3 text-sm md:text-base font-medium">
-              {["Auto DM replies", "Keyword triggers", "AI-powered responses", "Comment automation"].map((item) => (
+              {["AI Lead Discovery", "Website Generator", "Auto Proposals", "Payment Links"].map((item) => (
                 <span key={item} className="text-foreground flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                   {item}
                 </span>
               ))}
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 md:gap-x-8 gap-y-3 text-sm md:text-base font-medium">
-              {["Analytics dashboard", "Cold outreach"].map((item) => (
+              {["DM Automation", "Comment Replies", "Analytics Dashboard", "Recurring Billing"].map((item) => (
                 <span key={item} className="text-foreground flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                   {item}
                 </span>
               ))}
             </div>
           </div>
 
-          {/* CTA Button */}
-          <div className="flex flex-col items-center gap-5 animate-slide-up delay-400">
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up delay-400">
             <Link href="/dashboard">
               <Button
                 size="lg"
-                className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 rounded-full shadow-xl shadow-purple-500/25 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
-                Start automating free
+                Start finding clients
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-            <p className="text-sm md:text-base text-muted-foreground">Free plan available. No credit card required.</p>
+            <Link href="/dashboard">
+              <Button
+                size="lg"
+                variant="outline"
+                className="group h-14 md:h-16 px-8 md:px-10 text-base md:text-lg rounded-full transition-all duration-300 hover:-translate-y-1"
+              >
+                <InstagramIcon className="mr-2 h-5 w-5" />
+                Automate DMs
+              </Button>
+            </Link>
+          </div>
+          <p className="mt-5 text-sm md:text-base text-muted-foreground">Free plan available. No credit card required.</p>
+
+          {/* Stats row */}
+          <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto animate-slide-up delay-500">
+            <div className="text-center">
+              <p className="text-3xl md:text-4xl font-bold">500+</p>
+              <p className="text-sm text-muted-foreground mt-1">Deals Closed</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl md:text-4xl font-bold">10K+</p>
+              <p className="text-sm text-muted-foreground mt-1">Leads Found</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl md:text-4xl font-bold">$2M+</p>
+              <p className="text-sm text-muted-foreground mt-1">Revenue Generated</p>
+            </div>
           </div>
         </div>
       </div>

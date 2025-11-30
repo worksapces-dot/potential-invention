@@ -4,9 +4,6 @@ import { client } from '@/lib/prisma'
 import { Resend } from 'resend'
 import Stripe from 'stripe'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const stripe = new Stripe(process.env.STRIPE_CLIENT_SECRET!)
-
 export async function POST(req: NextRequest) {
   try {
     const user = await currentUser()
@@ -31,8 +28,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Initialize Stripe inside the function to avoid build-time errors
+    const stripe = new Stripe(process.env.STRIPE_CLIENT_SECRET!)
+
     // Verify deal belongs to user
-    const deal = await client.coldCallDeal.findFirst({
+    const deal = await (client.coldCallDeal as any).findFirst({
       where: { id: dealId },
       include: {
         ColdCallLead: {
@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
       : null
 
     // Send email with payment link
+    const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
       from: 'Slide <noreply@slide.so>',
       to: clientEmail,
