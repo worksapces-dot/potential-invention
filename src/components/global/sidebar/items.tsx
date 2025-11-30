@@ -1,7 +1,9 @@
-import { SIDEBAR_MENU } from '@/constants/menu'
+'use client'
+
+import { getFilteredMenu, UserType } from '@/constants/menu'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 type Props = {
   page: string
@@ -9,7 +11,39 @@ type Props = {
 }
 
 const Items = ({ page, slug }: Props) => {
-  return SIDEBAR_MENU.map((item) => (
+  const [userType, setUserType] = useState<UserType>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        const res = await fetch('/api/user/onboarding')
+        if (res.ok) {
+          const data = await res.json()
+          setUserType(data.userType)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user type:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchUserType()
+  }, [])
+
+  const filteredMenu = getFilteredMenu(userType)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2 px-3">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-10 bg-[#1a1a1a] rounded-full animate-pulse" />
+        ))}
+      </div>
+    )
+  }
+
+  return filteredMenu.map((item) => (
     <Link
       key={item.id}
       href={`/dashboard/${slug}/${item.label === 'home' ? '/' : item.label}`}
@@ -22,7 +56,7 @@ const Items = ({ page, slug }: Props) => {
       )}
     >
       {item.icon}
-      {item.label}
+      {item.label === 'cold-call' ? 'Cold Call' : item.label}
     </Link>
   ))
 }

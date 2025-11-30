@@ -7,6 +7,8 @@ import { Toaster } from 'sonner'
 import ReactQueryProvider from '@/providers/react-query-provider'
 import ReduxProvider from '@/providers/redux-provider'
 import Script from 'next/script'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'] })
 
@@ -98,7 +100,38 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        elements: {
+          formButtonPrimary:
+            'bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-lg',
+          card: 'bg-background/80 backdrop-blur-xl border border-border/50 shadow-2xl rounded-3xl',
+          headerTitle: 'text-foreground font-bold',
+          headerSubtitle: 'text-muted-foreground',
+          socialButtonsBlockButton:
+            'bg-muted hover:bg-muted/80 border-border/50 rounded-xl',
+          socialButtonsBlockButtonText: 'text-foreground font-medium',
+          formFieldLabel: 'text-foreground',
+          formFieldInput:
+            'bg-muted border-border/50 rounded-xl focus:ring-foreground focus:border-foreground',
+          footerActionLink: 'text-foreground hover:text-foreground/80',
+          identityPreviewText: 'text-foreground',
+          identityPreviewEditButton: 'text-muted-foreground hover:text-foreground',
+          formFieldAction: 'text-muted-foreground hover:text-foreground',
+          dividerLine: 'bg-border',
+          dividerText: 'text-muted-foreground',
+        },
+        variables: {
+          colorPrimary: '#ffffff',
+          colorBackground: '#0a0a0a',
+          colorInputBackground: '#171717',
+          colorInputText: '#ffffff',
+          colorText: '#ffffff',
+          colorTextSecondary: '#a1a1aa',
+          borderRadius: '1rem',
+        },
+      }}
+    >
       <html lang="en">
         <body
           suppressHydrationWarning
@@ -115,6 +148,9 @@ export default function RootLayout({
 
             <Toaster />
           </ThemeProvider>
+
+          <Analytics />
+          <SpeedInsights />
 
           <Script
             defer

@@ -24,6 +24,10 @@ model User {
   integrations Integrations[]
   automations  Automation[]
   
+  // Onboarding & User Type
+  userType          UserType?
+  onboardingComplete Boolean   @default(false)
+  
   // Streak tracking
   currentStreak Int      @default(0)
   longestStreak Int      @default(0)
@@ -145,6 +149,12 @@ model Keyword {
 enum SUBSCRIPTION_PLAN {
   PRO
   FREE
+}
+
+enum UserType {
+  CREATOR       // Instagram automation, DMs, comments
+  COLD_CALLER   // Cold call system, lead generation
+  BOTH          // Access to everything
 }
 
 enum INTEGRATIONS {

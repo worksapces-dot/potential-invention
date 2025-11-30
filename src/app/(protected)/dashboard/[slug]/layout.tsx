@@ -12,6 +12,9 @@ import {
 } from '@/react-query/prefetch'
 import { Metadata } from 'next'
 import { trackUserLogin } from '@/actions/user/streak'
+import { redirect } from 'next/navigation'
+import { onCurrentUser } from '@/actions/user'
+import { client } from '@/lib/prisma'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -29,6 +32,17 @@ type Props = {
 
 const Layout = async ({ children, params }: Props) => {
   const query = new QueryClient()
+
+  // Check if user has completed onboarding
+  const user = await onCurrentUser()
+  const dbUser = await (client.user as any).findUnique({
+    where: { clerkId: user.id },
+    select: { onboardingComplete: true },
+  })
+
+  if (dbUser && !dbUser.onboardingComplete) {
+    redirect('/onboarding')
+  }
 
   await PrefetchUserProfile(query)
   await PrefetchUserAutnomations(query)
