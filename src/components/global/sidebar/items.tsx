@@ -32,17 +32,60 @@ const Items = ({ page, slug }: Props) => {
   }, [])
 
   const filteredMenu = getFilteredMenu(userType)
+  const isColdCaller = userType === 'COLD_CALLER'
 
   if (isLoading) {
     return (
       <div className="space-y-2 px-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-10 bg-[#1a1a1a] rounded-full animate-pulse" />
+          <div key={i} className={cn(
+            "h-10 animate-pulse",
+            isColdCaller ? "bg-muted/50 rounded-xl" : "bg-[#1a1a1a] rounded-full"
+          )} />
         ))}
       </div>
     )
   }
 
+  const formatLabel = (label: string) => {
+    if (label === 'cold-call') return 'Cold Call'
+    if (label === 'home') return isColdCaller ? 'Dashboard' : 'home'
+    return label
+  }
+
+  // Cold Caller - new clean style
+  if (isColdCaller) {
+    return (
+      <div className="space-y-1">
+        {filteredMenu.map((item) => {
+          const isActive = page === item.label || (page === slug && item.label === 'home')
+          
+          return (
+            <Link
+              key={item.id}
+              href={`/dashboard/${slug}/${item.label === 'home' ? '' : item.label}`}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200',
+                isActive
+                  ? 'bg-foreground text-background font-medium shadow-lg'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              )}
+            >
+              <span className={cn(
+                'flex items-center justify-center',
+                isActive ? 'text-background' : 'text-muted-foreground'
+              )}>
+                {item.icon}
+              </span>
+              <span className="text-sm capitalize">{formatLabel(item.label)}</span>
+            </Link>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // Creator / BOTH - original gradient style
   return filteredMenu.map((item) => (
     <Link
       key={item.id}
@@ -56,7 +99,7 @@ const Items = ({ page, slug }: Props) => {
       )}
     >
       {item.icon}
-      {item.label === 'cold-call' ? 'Cold Call' : item.label}
+      {formatLabel(item.label)}
     </Link>
   ))
 }
