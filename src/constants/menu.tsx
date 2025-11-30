@@ -44,7 +44,7 @@ export const SIDEBAR_MENU: SideBarProps[] = [
     id: uuid(),
     label: 'analytics',
     icon: <BarDuoToneBlue />,
-    allowedTypes: ['ALL'],
+    allowedTypes: ['CREATOR', 'BOTH'],
   },
   {
     id: uuid(),
