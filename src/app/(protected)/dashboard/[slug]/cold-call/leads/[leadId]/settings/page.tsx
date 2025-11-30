@@ -33,7 +33,9 @@ import {
   Sparkles,
   ExternalLink,
   Globe,
+  Link2,
 } from 'lucide-react'
+import { SubdomainManager } from '@/components/subdomain-manager'
 import { Textarea } from '@/components/ui/textarea'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -87,6 +89,9 @@ export default function LeadSettingsPage() {
   const [seoKeywords, setSeoKeywords] = useState('')
   const [isSavingSeo, setIsSavingSeo] = useState(false)
 
+  // Subdomain
+  const [subdomain, setSubdomain] = useState<string | null>(null)
+
   useEffect(() => { fetchData() }, [leadId])
 
   const fetchData = async () => {
@@ -106,6 +111,7 @@ export default function LeadSettingsPage() {
         setSeoTitle(lead.generatedWebsite.seoTitle || '')
         setSeoDescription(lead.generatedWebsite.seoDescription || '')
         setSeoKeywords((lead.generatedWebsite.seoKeywords || []).join(', '))
+        setSubdomain(lead.generatedWebsite.subdomain || null)
         if (lead.generatedWebsite.clientAccess) setClientAccess(lead.generatedWebsite.clientAccess)
 
         const servicesRes = await fetch(`/api/cold-call/services?websiteId=${lead.generatedWebsite.id}`)
@@ -291,6 +297,9 @@ export default function LeadSettingsPage() {
             <TabsTrigger value="general" className="data-[state=active]:bg-background">
               <Globe className="h-4 w-4 mr-2" />General
             </TabsTrigger>
+            <TabsTrigger value="domain" className="data-[state=active]:bg-background">
+              <Link2 className="h-4 w-4 mr-2" />Domain
+            </TabsTrigger>
             <TabsTrigger value="booking" className="data-[state=active]:bg-background">
               <Calendar className="h-4 w-4 mr-2" />Booking
             </TabsTrigger>
@@ -315,6 +324,53 @@ export default function LeadSettingsPage() {
                   <span className="text-green-500 font-medium">Live</span>
                 </div>
                 <code className="text-xs bg-muted px-2 py-1 rounded">/cold-call/preview/{websiteId?.slice(0, 8)}...</code>
+              </div>
+              {subdomain && (
+                <div className="mt-4 flex items-center justify-between p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                  <div className="flex items-center gap-3">
+                    <Link2 className="h-4 w-4 text-blue-500" />
+                    <span className="text-blue-500 font-medium">Custom Domain Active</span>
+                  </div>
+                  <code className="text-xs bg-muted px-2 py-1 rounded">{subdomain}.{process.env.NEXT_PUBLIC_APP_DOMAIN || 'localhost:3000'}</code>
+                </div>
+              )}
+            </Card>
+          </TabsContent>
+
+          {/* Domain Tab */}
+          <TabsContent value="domain" className="space-y-6">
+            <Card className="p-6">
+              <h3 className="font-medium mb-2">Custom Subdomain</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Give your client a professional, memorable URL instead of a long preview link.
+              </p>
+              <SubdomainManager
+                websiteId={websiteId!}
+                currentSubdomain={subdomain}
+                onSubdomainChange={setSubdomain}
+              />
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="font-medium mb-2">Preview Link</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                The default preview link always works, even without a custom subdomain.
+              </p>
+              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                <code className="text-xs flex-1 truncate">
+                  {typeof window !== 'undefined' ? window.location.origin : ''}/cold-call/preview/{websiteId}
+                </code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/cold-call/preview/${websiteId}`)
+                    toast.success('Copied!')
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
             </Card>
           </TabsContent>
@@ -410,7 +466,7 @@ export default function LeadSettingsPage() {
                       </label>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-3">Click "Regenerate" after adding images to apply changes.</p>
+                  <p className="text-xs text-muted-foreground mt-3">Click &quot;Regenerate&quot; after adding images to apply changes.</p>
                 </div>
               </div>
             </Card>

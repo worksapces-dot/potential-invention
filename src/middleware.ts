@@ -9,9 +9,38 @@ const isProtectedRoute = createRouteMatcher([
   '/callback(.*)',
 ])
 
+// Root domain from env
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'localhost:3000'
+
 export default clerkMiddleware(async (auth, req) => {
-  // Handle referral codes in URL
   const url = req.nextUrl.clone()
+  const hostname = req.headers.get('host') || ''
+  
+  // Extract subdomain from hostname
+  // e.g., "joes-plumbing.slide.app" -> "joes-plumbing"
+  // e.g., "joes-plumbing.localhost:3000" -> "joes-plumbing"
+  let subdomain: string | null = null
+  
+  if (hostname !== ROOT_DOMAIN && hostname !== `www.${ROOT_DOMAIN}`) {
+    // Check if it's a subdomain of our root domain
+    const hostWithoutPort = hostname.split(':')[0]
+    const rootWithoutPort = ROOT_DOMAIN.split(':')[0]
+    
+    if (hostWithoutPort.endsWith(`.${rootWithoutPort}`) || hostWithoutPort.endsWith('.localhost')) {
+      subdomain = hostWithoutPort.replace(`.${rootWithoutPort}`, '').replace('.localhost', '')
+    }
+  }
+  
+  // If we have a subdomain, rewrite to the subdomain page
+  if (subdomain && subdomain !== 'www' && subdomain !== 'app') {
+    // Don't rewrite API routes or static files
+    if (!url.pathname.startsWith('/api') && !url.pathname.startsWith('/_next')) {
+      url.pathname = `/${subdomain}${url.pathname === '/' ? '' : url.pathname}`
+      return NextResponse.rewrite(url)
+    }
+  }
+  
+  // Handle referral codes in URL
   const referralCode = url.searchParams.get('ref')
   
   if (referralCode && !req.nextUrl.pathname.startsWith('/api')) {

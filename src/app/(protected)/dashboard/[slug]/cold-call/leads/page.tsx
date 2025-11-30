@@ -24,7 +24,11 @@ import {
   Trash2,
   Eye,
   Sparkles,
-  Link2
+  Link2,
+  LayoutGrid,
+  Columns3,
+  Calendar,
+  Bell,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -35,6 +39,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { PipelineView } from '@/components/cold-call/pipeline-view'
 
 type Lead = {
   id: string
@@ -51,6 +56,8 @@ type Lead = {
   reviewCount: number | null
   googleMapsUrl: string | null
   status: string
+  nextFollowUp: string | null
+  lastContactedAt: string | null
   createdAt: string
   generatedWebsite: any | null
   outreachEmails: any[]
@@ -72,9 +79,13 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [viewMode, setViewMode] = useState<'grid' | 'pipeline'>('grid')
+  const [followUpCount, setFollowUpCount] = useState(0)
+  const [generatingId, setGeneratingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchLeads()
+    fetchFollowUps()
   }, [statusFilter])
 
   const fetchLeads = async () => {
@@ -96,6 +107,18 @@ export default function LeadsPage() {
       toast.error('Failed to load leads')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const fetchFollowUps = async () => {
+    try {
+      const res = await fetch('/api/cold-call/follow-up')
+      const data = await res.json()
+      if (res.ok) {
+        setFollowUpCount(data.leads?.length || 0)
+      }
+    } catch (error) {
+      console.error('Failed to fetch follow-ups:', error)
     }
   }
 
@@ -137,8 +160,6 @@ export default function LeadsPage() {
     }
   }
 
-  const [generatingId, setGeneratingId] = useState<string | null>(null)
-
   const handleGenerateWebsite = async (leadId: string) => {
     setGeneratingId(leadId)
     toast.info('Generating website... This may take 30-60 seconds.')
@@ -156,12 +177,12 @@ export default function LeadsPage() {
         throw new Error(data.error || 'Failed to generate website')
       }
 
-      // Update the lead in state
       setLeads(leads.map(l => 
-        l.id === leadId ? { ...l, generatedWebsite: data.website } : l
+        l.id === leadId ? { ...l, generatedWebsite: { id: data.websiteId } } : l
       ))
       
       toast.success('Website generated! Click to preview.')
+      fetchLeads() // Refresh to get full data
     } catch (error) {
       console.error('Generate error:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to generate website')
@@ -173,7 +194,7 @@ export default function LeadsPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <Link href={`/dashboard/${slug}/cold-call`}>
             <Button variant="ghost" size="icon" className="rounded-full">
@@ -188,21 +209,51 @@ export default function LeadsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Filter status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="NEW">New</SelectItem>
-              <SelectItem value="CONTACTED">Contacted</SelectItem>
-              <SelectItem value="INTERESTED">Interested</SelectItem>
-              <SelectItem value="NEGOTIATING">Negotiating</SelectItem>
-              <SelectItem value="WON">Won</SelectItem>
-              <SelectItem value="LOST">Lost</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Follow-up Alert */}
+          {followUpCount > 0 && (
+            <Button variant="outline" size="sm" className="gap-2">
+              <Bell className="h-4 w-4 text-orange-500" />
+              <span>{followUpCount} follow-up{followUpCount > 1 ? 's' : ''} due</span>
+            </Button>
+          )}
+
+          {/* View Toggle */}
+          <div className="flex rounded-lg border p-1">
+            <Button
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 px-3"
+              onClick={() => setViewMode('grid')}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'pipeline' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 px-3"
+              onClick={() => setViewMode('pipeline')}
+            >
+              <Columns3 className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {viewMode === 'grid' && (
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Filter status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="NEW">New</SelectItem>
+                <SelectItem value="CONTACTED">Contacted</SelectItem>
+                <SelectItem value="INTERESTED">Interested</SelectItem>
+                <SelectItem value="NEGOTIATING">Negotiating</SelectItem>
+                <SelectItem value="WON">Won</SelectItem>
+                <SelectItem value="LOST">Lost</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
 
           <Link href={`/dashboard/${slug}/cold-call/find-leads`}>
             <Button>Find More Leads</Button>
@@ -217,8 +268,18 @@ export default function LeadsPage() {
         </div>
       )}
 
-      {/* Leads Grid */}
-      {!isLoading && leads.length > 0 && (
+      {/* Pipeline View */}
+      {!isLoading && viewMode === 'pipeline' && leads.length > 0 && (
+        <PipelineView
+          leads={leads}
+          slug={slug}
+          onStatusChange={handleUpdateStatus}
+          onGenerateWebsite={handleGenerateWebsite}
+        />
+      )}
+
+      {/* Grid View */}
+      {!isLoading && viewMode === 'grid' && leads.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {leads.map((lead) => (
             <Card 
@@ -227,7 +288,12 @@ export default function LeadsPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate">{lead.businessName}</h3>
+                  <Link 
+                    href={`/dashboard/${slug}/cold-call/leads/${lead.id}`}
+                    className="font-semibold truncate block hover:underline"
+                  >
+                    {lead.businessName}
+                  </Link>
                   <p className="text-sm text-muted-foreground capitalize">
                     {lead.category.replace('_', ' ')}
                   </p>
@@ -301,13 +367,16 @@ export default function LeadsPage() {
                   </div>
                 )}
 
-                {lead.email && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Mail className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{lead.email}</span>
+                {lead.nextFollowUp && (
+                  <div className={`flex items-center gap-2 ${
+                    new Date(lead.nextFollowUp) < new Date() ? 'text-red-500' : 'text-blue-500'
+                  }`}>
+                    <Calendar className="h-4 w-4 shrink-0" />
+                    <span className="text-xs">
+                      Follow-up: {new Date(lead.nextFollowUp).toLocaleDateString()}
+                    </span>
                   </div>
                 )}
-
               </div>
 
               {/* Website Actions */}
@@ -360,18 +429,6 @@ export default function LeadsPage() {
                   </Button>
                 )}
               </div>
-
-              {lead.googleMapsUrl && (
-                <a
-                  href={lead.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  View on Yelp
-                </a>
-              )}
             </Card>
           ))}
         </div>

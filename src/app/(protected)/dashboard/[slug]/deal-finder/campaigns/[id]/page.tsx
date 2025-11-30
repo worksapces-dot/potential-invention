@@ -446,7 +446,7 @@ export default function CampaignDetailPage() {
             <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No prospects yet</h3>
             <p className="text-muted-foreground mb-6">
-              Click "Run Campaign" to find clients and send DMs automatically
+              Click &quot;Run Campaign&quot; to find clients and send DMs automatically
             </p>
             <Button 
               onClick={runCampaign} 

@@ -27,7 +27,10 @@ import {
   Check,
   Settings,
   Calendar,
+  Clock,
+  History,
 } from 'lucide-react'
+import { ActivityTimeline } from '@/components/cold-call/activity-timeline'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -49,6 +52,7 @@ type Lead = {
   status: string
   notes: string | null
   createdAt: string
+  nextFollowUp?: string | null
   generatedWebsite: {
     id: string
     previewUrl: string
@@ -356,26 +360,100 @@ export default function LeadDetailPage() {
         </Card>
       </div>
 
-      {/* Notes */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Notes */}
+        <Card className="p-6 bg-background/50 border-border/50">
+          <h2 className="text-lg font-semibold mb-4">Notes</h2>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add notes about this lead..."
+            className="min-h-[100px] mb-4"
+          />
+          <Button onClick={handleSaveNotes} disabled={isSavingNotes}>
+            {isSavingNotes ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save Notes'
+            )}
+          </Button>
+        </Card>
+
+        {/* Activity Timeline */}
+        <Card className="p-6 bg-background/50 border-border/50">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <History className="h-5 w-5" />
+            Activity
+          </h2>
+          <ActivityTimeline leadId={leadId} />
+        </Card>
+      </div>
+
+      {/* Follow-up Scheduler */}
       <Card className="p-6 bg-background/50 border-border/50">
-        <h2 className="text-lg font-semibold mb-4">Notes</h2>
-        <Textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add notes about this lead..."
-          className="min-h-[100px] mb-4"
-        />
-        <Button onClick={handleSaveNotes} disabled={isSavingNotes}>
-          {isSavingNotes ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            'Save Notes'
-          )}
-        </Button>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          Schedule Follow-up
+        </h2>
+        <FollowUpScheduler leadId={leadId} currentFollowUp={lead?.nextFollowUp} />
       </Card>
+    </div>
+  )
+}
+
+function FollowUpScheduler({ leadId, currentFollowUp }: { leadId: string, currentFollowUp?: string | null }) {
+  const [date, setDate] = useState(currentFollowUp ? new Date(currentFollowUp).toISOString().split('T')[0] : '')
+  const [isScheduling, setIsScheduling] = useState(false)
+
+  const handleSchedule = async () => {
+    if (!date) return
+    setIsScheduling(true)
+    try {
+      const res = await fetch('/api/cold-call/follow-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leadId, followUpDate: date }),
+      })
+      if (res.ok) {
+        toast.success('Follow-up scheduled!')
+      }
+    } catch {
+      toast.error('Failed to schedule')
+    } finally {
+      setIsScheduling(false)
+    }
+  }
+
+  const handleClear = async () => {
+    try {
+      await fetch(`/api/cold-call/follow-up?leadId=${leadId}`, { method: 'DELETE' })
+      setDate('')
+      toast.success('Follow-up cleared')
+    } catch {
+      toast.error('Failed to clear')
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      <input
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+        min={new Date().toISOString().split('T')[0]}
+        className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+      />
+      <Button onClick={handleSchedule} disabled={!date || isScheduling} size="sm">
+        {isScheduling ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Schedule'}
+      </Button>
+      {currentFollowUp && (
+        <Button variant="ghost" size="sm" onClick={handleClear}>
+          Clear
+        </Button>
+      )}
     </div>
   )
 }

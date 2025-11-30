@@ -15,7 +15,8 @@ import {
   Building2,
   Phone,
   CheckCircle2,
-  Lock
+  Lock,
+  BarChart3
 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -53,6 +54,14 @@ const steps = [
     title: 'Close Deal',
     description: 'Client pays, you deliver the website and profit',
     href: 'cold-call/deals',
+    active: true,
+  },
+  {
+    number: '05',
+    icon: BarChart3,
+    title: 'Analytics',
+    description: 'Track your conversion funnel, ROI, and revenue metrics',
+    href: 'cold-call/analytics',
     active: true,
   },
 ]

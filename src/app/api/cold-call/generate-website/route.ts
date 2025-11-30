@@ -116,208 +116,214 @@ export async function POST(req: NextRequest) {
   }
 }
 
-const SYSTEM_PROMPT = `You are a world-class web designer from a top agency like Pentagram or Huge. You create minimal, sophisticated websites that win Awwwards.
+const SYSTEM_PROMPT = `You are a world-class web designer creating modern, conversion-focused websites inspired by top SaaS landing pages like Linear, Vercel, and Stripe.
 
 DESIGN PHILOSOPHY:
-- MINIMAL & ELEGANT: Less is more. Whitespace is your friend.
-- EDITORIAL FEEL: Like a luxury magazine - clean, refined, intentional
-- ASYMMETRIC LAYOUTS: Break the grid thoughtfully. Split screens, offset elements.
-- TYPOGRAPHY-FIRST: Type IS the design. Large, bold headlines. Thin elegant body text.
-- MUTED COLORS: Sophisticated palettes - off-whites, warm grays, one accent color
-- SUBTLE ANIMATIONS: Gentle fades, smooth transitions. Never flashy.
+- MODERN & CLEAN: Minimal, sophisticated, lots of whitespace
+- DARK/LIGHT CONTRAST: Dark sections alternating with light for visual rhythm
+- ROUNDED CORNERS: Use rounded-2xl and rounded-3xl extensively
+- GLASSMORPHISM: Subtle backdrop-blur effects, semi-transparent backgrounds
+- BOLD TYPOGRAPHY: Large headlines (text-5xl to text-7xl), tight tracking
+- SUBTLE ANIMATIONS: Hover effects, smooth transitions
+- TRUST SIGNALS: Reviews, ratings, badges prominently displayed
 
 STRICT DESIGN RULES:
-1. HERO: Full viewport, split layout (text left, image right) or large image with overlay text
-2. TYPOGRAPHY: Use font-weight contrasts (900 for headlines, 300 for body). Letter-spacing on caps.
-3. SPACING: Minimum py-24 for sections. Generous gaps (gap-16, gap-20). Let content breathe.
-4. COLORS: Background #fafafa or #f5f5f4. Text #1a1a1a. One muted accent (terracotta, sage, navy)
-5. IMAGES: Large, cinematic. Use aspect-[4/3] or aspect-[3/4]. Rounded corners (rounded-2xl)
-6. NAVIGATION: Minimal. Logo left, few links center/right. Sticky, transparent or light bg.
-7. BUTTONS: Understated. Border buttons or text links with arrows. No heavy gradients.
-8. GRID: Use asymmetric grids. 60/40 splits. Offset images. Overlapping elements.
-9. FOOTER: Simple, elegant. Dark or light. Minimal links.
-10. NO CLUTTER: Remove anything unnecessary. Every element must earn its place.
+1. HERO: Full viewport, centered content, large headline, subtitle, CTA button, trust badges below
+2. NAVIGATION: Sticky, glassmorphism (bg-white/80 backdrop-blur-xl), rounded-2xl, logo left, links right
+3. BUTTONS: Rounded-full, dark bg (bg-gray-900), white text, shadow-xl, hover:-translate-y-0.5
+4. CARDS: bg-white, rounded-3xl, border border-gray-200, p-8, hover:shadow-xl transition
+5. SECTIONS: Alternate between bg-white and bg-gray-50, py-24 minimum
+6. BADGES: rounded-full, bg-gray-100, px-4 py-2, text-sm font-medium
+7. ICONS: Use Lucide icons, displayed in rounded-2xl bg containers
+8. IMAGES: rounded-3xl, shadow-2xl, object-cover
+9. GRID: Use asymmetric layouts, bento grids for features
+10. FOOTER: Dark (bg-gray-900 text-white), rounded-t-[3rem], comprehensive links
 
-LAYOUT PATTERNS TO USE:
-- Split hero: Large headline left (text-6xl md:text-8xl), full-height image right
-- Bento grid: Asymmetric card layouts with varying sizes
-- Editorial sections: Large image with small text block offset
-- Feature strips: Icon + text in horizontal rows with lots of space
-- Testimonials: Single large quote, minimal styling
+COLOR PALETTE:
+- Background: white (#ffffff) and gray-50 (#f9fafb)
+- Text: gray-900 (#111827) for headlines, gray-600 (#4b5563) for body
+- Accent: Use category-specific accent color sparingly
+- Borders: gray-200 (#e5e7eb)
 
 Return ONLY the HTML code inside the <body> tag. No explanations, no markdown.`
 
 function buildPremiumPrompt(lead: any, customImages: string[] = []): string {
   const categoryStyles: Record<string, any> = {
     restaurant: {
-      accent: '#8B4513',
-      accentName: 'warm sienna',
-      imagery: ['1414235077428-338989a2e8c0', '1517248135467-4c7edcad34c4', '1552566626-52f8b828add9'],
-      tagline: 'A Culinary Experience',
+      accent: '#dc2626',
+      accentName: 'red-600',
+      imagery: ['1414235077428-338989a2e8c0', '1517248135467-4c7edcad34c4'],
+      tagline: 'Exceptional Dining Experience',
+      services: ['Dine-In', 'Takeout', 'Catering', 'Private Events'],
     },
     cafe: {
-      accent: '#C4A484',
-      accentName: 'warm taupe',
-      imagery: ['1495474472287-4d71bcdd2085', '1501339847302-ac426a4a7cbb', '1509042239860-f550ce710b93'],
-      tagline: 'Crafted With Care',
+      accent: '#92400e',
+      accentName: 'amber-800',
+      imagery: ['1495474472287-4d71bcdd2085', '1501339847302-ac426a4a7cbb'],
+      tagline: 'Crafted With Passion',
+      services: ['Specialty Coffee', 'Fresh Pastries', 'Breakfast', 'Lunch'],
     },
     salon: {
-      accent: '#B8860B',
-      accentName: 'golden',
-      imagery: ['1560066984-138dadb4c035', '1522337360788-8b13dee7a37e', '1521590832167-7bcbfaa6381f'],
+      accent: '#be185d',
+      accentName: 'pink-700',
+      imagery: ['1560066984-138dadb4c035', '1522337360788-8b13dee7a37e'],
       tagline: 'Your Style, Elevated',
+      services: ['Haircuts', 'Coloring', 'Styling', 'Treatments'],
     },
     dentist: {
-      accent: '#5F9EA0',
-      accentName: 'calm teal',
-      imagery: ['1629909613654-28e377c37b09', '1588776814546-1ffcf47267a5', '1606811841689-23dfddce3e95'],
+      accent: '#0891b2',
+      accentName: 'cyan-600',
+      imagery: ['1629909613654-28e377c37b09', '1588776814546-1ffcf47267a5'],
       tagline: 'Smile With Confidence',
+      services: ['Cleanings', 'Whitening', 'Implants', 'Cosmetic'],
     },
     plumber: {
-      accent: '#2F4F4F',
-      accentName: 'slate',
-      imagery: ['1581578731548-c64695cc6952', '1504328345606-18bbc8c9d7d1', '1558618666-fcd25c85cd64'],
-      tagline: 'Reliable. Professional. Fast.',
+      accent: '#2563eb',
+      accentName: 'blue-600',
+      imagery: ['1581578731548-c64695cc6952', '1504328345606-18bbc8c9d7d1'],
+      tagline: 'Fast. Reliable. Professional.',
+      services: ['Emergency Repairs', 'Installation', 'Maintenance', 'Inspections'],
     },
     electrician: {
-      accent: '#DAA520',
-      accentName: 'amber',
-      imagery: ['1621905251189-08b45d6a269e', '1558618666-fcd25c85cd64', '1581578731548-c64695cc6952'],
+      accent: '#ca8a04',
+      accentName: 'yellow-600',
+      imagery: ['1621905251189-08b45d6a269e', '1558618666-fcd25c85cd64'],
       tagline: 'Powering Your World Safely',
+      services: ['Repairs', 'Installation', 'Upgrades', 'Inspections'],
     },
     gym: {
-      accent: '#DC143C',
-      accentName: 'crimson',
-      imagery: ['1534438327276-14e5300c3a48', '1571902943202-507ec2618e8f', '1517836357463-d25dfeac3438'],
+      accent: '#dc2626',
+      accentName: 'red-600',
+      imagery: ['1534438327276-14e5300c3a48', '1571902943202-507ec2618e8f'],
       tagline: 'Transform Your Limits',
+      services: ['Personal Training', 'Group Classes', 'Nutrition', 'Recovery'],
     },
     spa: {
-      accent: '#9CAF88',
-      accentName: 'sage',
-      imagery: ['1544161515-4ab6ce6db874', '1540555700478-4be289fbecef', '1507003211169-0a1dd7228f2d'],
+      accent: '#059669',
+      accentName: 'emerald-600',
+      imagery: ['1544161515-4ab6ce6db874', '1540555700478-4be289fbecef'],
       tagline: 'Restore. Renew. Relax.',
+      services: ['Massage', 'Facials', 'Body Treatments', 'Wellness'],
     },
     auto_repair: {
-      accent: '#B22222',
-      accentName: 'deep red',
-      imagery: ['1486262715619-67b85e0b08d3', '1558618666-fcd25c85cd64', '1530046339160-ce3e530c7d2f'],
+      accent: '#dc2626',
+      accentName: 'red-600',
+      imagery: ['1486262715619-67b85e0b08d3', '1558618666-fcd25c85cd64'],
       tagline: 'Expert Care For Your Vehicle',
+      services: ['Diagnostics', 'Repairs', 'Maintenance', 'Inspections'],
     },
     cleaning: {
-      accent: '#4682B4',
-      accentName: 'steel blue',
-      imagery: ['1581578731548-c64695cc6952', '1527515637462-cff94eecc1ac', '1558317374-067fb5f30001'],
+      accent: '#0891b2',
+      accentName: 'cyan-600',
+      imagery: ['1581578731548-c64695cc6952', '1527515637462-cff94eecc1ac'],
       tagline: 'Spotless. Every Time.',
+      services: ['Residential', 'Commercial', 'Deep Clean', 'Move-In/Out'],
     },
     landscaping: {
-      accent: '#556B2F',
-      accentName: 'olive',
-      imagery: ['1558904541-efa843a96f01', '1416879595882-3373a0480b5b', '1585320806297-9794b3e4eeae'],
+      accent: '#16a34a',
+      accentName: 'green-600',
+      imagery: ['1558904541-efa843a96f01', '1416879595882-3373a0480b5b'],
       tagline: 'Nature, Perfected',
+      services: ['Design', 'Installation', 'Maintenance', 'Hardscaping'],
     },
     bakery: {
-      accent: '#DEB887',
-      accentName: 'warm wheat',
-      imagery: ['1509440159562-66b02b259e5c', '1486427944299-d1955d23e34d', '1517433670267-30f206be5f84'],
+      accent: '#ea580c',
+      accentName: 'orange-600',
+      imagery: ['1509440159562-66b02b259e5c', '1486427944299-d1955d23e34d'],
       tagline: 'Baked Fresh Daily',
+      services: ['Bread', 'Pastries', 'Custom Cakes', 'Catering'],
     },
   }
 
   const style = categoryStyles[lead.category] || {
-    accent: '#374151',
-    accentName: 'charcoal',
-    imagery: ['1497366216548-37526070297c', '1497366811353-6870744d04b2'],
+    accent: '#2563eb',
+    accentName: 'blue-600',
+    imagery: ['1497366216548-37526070297c'],
     tagline: 'Excellence In Every Detail',
+    services: ['Consultation', 'Service', 'Support', 'Maintenance'],
   }
 
-  const mainImage = style.imagery[0]
-  const secondaryImage = style.imagery[1] || style.imagery[0]
+  const heroImage = customImages[0] || `https://images.unsplash.com/photo-${style.imagery[0]}?w=1200&q=80`
+  const aboutImage = customImages[1] || `https://images.unsplash.com/photo-${style.imagery[1] || style.imagery[0]}?w=800&q=80`
 
-  // Use custom images if available, otherwise use Unsplash
-  const heroImage = customImages[0] || `https://images.unsplash.com/photo-${mainImage}?w=1200&q=80`
-  const aboutImage = customImages[1] || `https://images.unsplash.com/photo-${secondaryImage}?w=800&q=80`
-  const galleryImages = customImages.length > 2 ? customImages.slice(2) : []
-
-  return `Create a MINIMAL, SOPHISTICATED website for:
+  return `Create a MODERN, CONVERSION-FOCUSED website for:
 
 BUSINESS: ${lead.businessName}
 TYPE: ${lead.category.replace(/_/g, ' ')}
 LOCATION: ${lead.city}, ${lead.country}
 PHONE: ${lead.phone || '(555) 123-4567'}
 TAGLINE: "${style.tagline}"
+${lead.rating ? `RATING: ${lead.rating} stars (${lead.reviewCount} reviews)` : ''}
 
-DESIGN SYSTEM:
-- Background: #fafaf9 (warm off-white)
-- Text: #1c1917 (warm black)
-- Accent: ${style.accent} (${style.accentName})
-- Secondary: #78716c (warm gray)
+ACCENT COLOR: ${style.accent} (${style.accentName})
+SERVICES: ${style.services.join(', ')}
 
-IMAGES TO USE (IMPORTANT - use these exact URLs):
-- Hero image: ${heroImage}
-- About/Secondary image: ${aboutImage}
-${galleryImages.length > 0 ? `- Gallery images: ${galleryImages.join(', ')}` : ''}
+IMAGES (use these exact URLs):
+- Hero: ${heroImage}
+- About: ${aboutImage}
 
-=== EXACT STRUCTURE TO FOLLOW ===
+=== EXACT STRUCTURE ===
 
-1. NAVIGATION (sticky top-0, bg-white/80 backdrop-blur):
-   - Logo/name on left (text-xl font-semibold tracking-tight)
-   - 3-4 minimal links on right (text-sm font-medium text-gray-600 hover:text-black)
-   - Use: "About", "Services", "Contact"
+1. NAVIGATION (sticky top-0 z-50 px-4 pt-4):
+   Container: mx-auto max-w-7xl rounded-2xl bg-white/80 backdrop-blur-xl border border-gray-200/50 shadow-lg
+   Inner: flex h-16 items-center justify-between px-6
+   - Logo: text-xl font-bold tracking-tight
+   - Links: hidden md:flex gap-8, text-sm font-medium text-gray-600 hover:text-gray-900
+   - CTA: rounded-full bg-gray-900 text-white px-6 py-2.5 text-sm font-medium shadow-lg hover:bg-gray-800
 
-2. HERO SECTION (min-h-screen, grid grid-cols-1 lg:grid-cols-2):
-   LEFT SIDE (flex flex-col justify-center px-8 lg:px-16):
-   - Small caps label: "• ${lead.category.toUpperCase().replace(/_/g, ' ')}" (text-xs tracking-[0.2em] text-gray-500)
-   - Main headline: Split into 2 lines, first line regular, second line in accent color
-     Example: "Quality" (text-6xl lg:text-8xl font-light) + "& Care" (same size, accent color)
-   - Subtitle: 2 lines max (text-lg text-gray-500 mt-6 max-w-md)
-   - CTA: Text link with arrow "View Services →" (text-sm font-medium mt-8 hover:underline)
-   
-   RIGHT SIDE:
-   - Full height image (h-[70vh] lg:h-screen object-cover)
-   - Add small location badge overlay: "${lead.city}" (absolute bottom-8 left-8, bg-white/90 px-4 py-2 text-xs)
+2. HERO (min-h-screen flex items-center py-20):
+   - Badge: inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium mb-8
+   - Headline: text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-gray-900 mb-6
+   - Subtitle: text-xl text-gray-600 max-w-2xl mb-8
+   - CTA Row: flex gap-4
+     - Primary: rounded-full bg-gray-900 text-white px-8 py-4 text-lg font-medium shadow-xl hover:-translate-y-0.5
+     - Secondary: rounded-full border-2 border-gray-200 px-8 py-4 text-lg font-medium hover:bg-gray-50
+   - Trust badges below: flex gap-6 mt-12 (rating stars, "Licensed & Insured", "Same Day Service")
+   - Hero image on right side or below on mobile
 
-3. FEATURES STRIP (py-8 border-y border-gray-200):
-   - 3 items in a row (grid grid-cols-3 gap-8 max-w-4xl mx-auto)
-   - Each: Icon (w-5 h-5) + text (text-sm text-gray-600)
-   - Examples: "Licensed & Insured", "5-Star Rated", "Same Day Service"
+3. FEATURES/SERVICES (py-24 bg-gray-50):
+   - Section badge + headline centered
+   - Bento grid (grid-cols-2 lg:grid-cols-4 gap-4)
+   - Each card: bg-white rounded-3xl p-8 border border-gray-200 hover:shadow-xl transition-all
+     - Icon in rounded-2xl bg-gray-100 container
+     - Service name (font-semibold text-lg)
+     - Brief description (text-gray-600)
 
-4. ABOUT SECTION (py-32 px-8):
-   - Asymmetric layout: Image on left (60%), text on right (40%)
-   - Image: aspect-[4/5] rounded-3xl
-   - Text: Small label "ABOUT US", headline (text-4xl font-light), paragraph (text-gray-600), link
+4. ABOUT SECTION (py-24):
+   - Two column: Image left (rounded-3xl shadow-2xl), content right
+   - Small label, large headline, paragraph, bullet points with checkmarks
 
-5. SERVICES SECTION (py-32 bg-gray-50):
-   - Section label + headline centered
-   - Bento grid of services (grid-cols-2 lg:grid-cols-3 gap-4)
-   - Each card: bg-white p-8 rounded-2xl, service name (font-medium), brief description (text-sm text-gray-500)
+5. WHY CHOOSE US (py-24 bg-gray-50):
+   - 3 cards in a row
+   - Each: icon, stat number (text-4xl font-bold), label
 
-6. TESTIMONIAL (py-32):
-   - Single large quote centered (text-3xl lg:text-4xl font-light italic max-w-3xl mx-auto text-center)
-   - Author name below (text-sm text-gray-500 mt-8)
+6. TESTIMONIAL (py-24):
+   - Large quote centered (text-2xl md:text-3xl italic text-gray-700)
+   - 5 stars above quote
+   - Author info below
 
-7. CTA SECTION (py-24 bg-[${style.accent}] text-white):
-   - Simple centered: Headline + subtitle + button (bg-white text-black)
+7. CTA SECTION (py-20 bg-gray-900 text-white rounded-[3rem] mx-4 my-8):
+   - Centered: headline, subtitle, white button
 
 8. FOOTER (py-16 bg-gray-900 text-white):
-   - Grid: Logo/about, Quick Links, Contact Info
-   - Copyright at bottom (text-sm text-gray-500)
+   - Grid: Business info, Quick Links, Services, Contact
+   - Copyright at bottom
 
-CRITICAL RULES:
-- NO gradients on buttons (use solid colors or borders)
-- NO heavy shadows (use shadow-sm or none)
-- NO rounded-full on cards (use rounded-2xl or rounded-3xl)
-- Headlines: font-light or font-normal, NOT bold
-- Lots of whitespace (py-32 for sections minimum)
-- Images should be LARGE and cinematic
-- Keep copy SHORT and elegant`
+CRITICAL:
+- Use Tailwind classes exactly as specified
+- All buttons: rounded-full with shadow
+- All cards: rounded-3xl
+- Lots of whitespace (py-24 for sections)
+- Include hover states on interactive elements
+- Make phone number clickable (tel: link)`
 }
+
 
 function wrapWithPremiumTemplate(
   html: string, 
   lead: any, 
   options: { customImages?: string[], logoUrl?: string | null } = {}
 ): string {
-  const chatbotContext = buildChatbotContext(lead)
   const { customImages = [], logoUrl } = options
   
   // SEO data
@@ -326,13 +332,15 @@ function wrapWithPremiumTemplate(
   const seoKeywords = lead.generatedWebsite?.seoKeywords?.join(', ') || `${lead.category.replace(/_/g, ' ')}, ${lead.city}, ${lead.businessName}`
   const heroImage = customImages[0] || `https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80`
   
+  const chatbotContext = buildChatbotContext(lead)
+  
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Primary SEO -->
+  <!-- SEO -->
   <title>${seoTitle}</title>
   <meta name="description" content="${seoDesc}">
   <meta name="keywords" content="${seoKeywords}">
@@ -343,15 +351,13 @@ function wrapWithPremiumTemplate(
   <meta property="og:title" content="${seoTitle}">
   <meta property="og:description" content="${seoDesc}">
   <meta property="og:image" content="${heroImage}">
-  <meta property="og:site_name" content="${lead.businessName}">
   
-  <!-- Twitter Card -->
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${seoTitle}">
   <meta name="twitter:description" content="${seoDesc}">
-  <meta name="twitter:image" content="${heroImage}">
   
-  <!-- Local Business Schema -->
+  <!-- Schema.org -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -382,24 +388,15 @@ function wrapWithPremiumTemplate(
           fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
           },
-          colors: {
-            stone: {
-              50: '#fafaf9',
-              100: '#f5f5f4',
-              200: '#e7e5e4',
-              800: '#292524',
-              900: '#1c1917',
-            }
-          }
         },
       },
     }
   </script>
   
-  <!-- Google Fonts - Using lighter weights for elegance -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -407,41 +404,28 @@ function wrapWithPremiumTemplate(
   <style>
     html { scroll-behavior: smooth; }
     body { 
-      font-family: 'Inter', system-ui, sans-serif; 
-      background-color: #fafaf9;
-      color: #1c1917;
+      font-family: 'Inter', system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
     
-    /* Elegant animations */
-    .fade-up { 
-      animation: fadeUp 0.8s ease-out; 
+    /* Animations */
+    .fade-up {
+      animation: fadeUp 0.6s ease-out forwards;
     }
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
+      from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
     
-    /* Subtle hover */
-    .hover-subtle {
+    .hover-lift {
       transition: all 0.3s ease;
     }
-    .hover-subtle:hover {
-      opacity: 0.7;
+    .hover-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     }
     
-    /* Image zoom on hover */
-    .img-zoom {
-      overflow: hidden;
-    }
-    .img-zoom img {
-      transition: transform 0.6s ease;
-    }
-    .img-zoom:hover img {
-      transform: scale(1.05);
-    }
-    
-    /* Chatbot styles - more minimal */
+    /* Chatbot Styles */
     #chatbot-widget {
       position: fixed;
       bottom: 24px;
@@ -451,45 +435,45 @@ function wrapWithPremiumTemplate(
     }
     
     #chatbot-button {
-      width: 56px;
-      height: 56px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      background: #1c1917;
+      background: #111827;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
     }
     
     #chatbot-button:hover {
       transform: scale(1.05);
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.25);
     }
     
     #chatbot-button svg {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       color: white;
     }
     
     #chatbot-window {
       position: absolute;
-      bottom: 72px;
+      bottom: 76px;
       right: 0;
-      width: 360px;
+      width: 380px;
       max-width: calc(100vw - 48px);
-      height: 480px;
+      height: 500px;
       max-height: calc(100vh - 120px);
-      background: #fafaf9;
-      border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.15);
       display: none;
       flex-direction: column;
       overflow: hidden;
-      border: 1px solid #e7e5e4;
+      border: 1px solid #e5e7eb;
     }
     
     #chatbot-window.open {
@@ -498,100 +482,103 @@ function wrapWithPremiumTemplate(
     }
     
     @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     
     #chatbot-header {
-      background: #1c1917;
+      background: #111827;
       color: white;
-      padding: 16px 20px;
+      padding: 20px 24px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
     
     #chatbot-header-avatar {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       background: rgba(255,255,255,0.1);
-      border-radius: 10px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     
     #chatbot-header-info h3 {
-      font-weight: 500;
-      font-size: 15px;
+      font-weight: 600;
+      font-size: 16px;
       margin: 0;
     }
     
     #chatbot-header-info p {
-      font-size: 12px;
+      font-size: 13px;
       opacity: 0.7;
-      margin: 2px 0 0 0;
+      margin: 3px 0 0 0;
     }
     
     #chatbot-close {
       margin-left: auto;
-      background: none;
+      background: rgba(255,255,255,0.1);
       border: none;
+      border-radius: 10px;
+      width: 36px;
+      height: 36px;
       color: white;
       cursor: pointer;
-      padding: 4px;
-      opacity: 0.6;
-      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
     }
     
     #chatbot-close:hover {
-      opacity: 1;
+      background: rgba(255,255,255,0.2);
     }
     
     #chatbot-messages {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      background: white;
+      gap: 14px;
+      background: #f9fafb;
     }
     
     .chat-message {
       max-width: 85%;
-      padding: 12px 16px;
-      border-radius: 18px;
+      padding: 14px 18px;
+      border-radius: 20px;
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
     
     .chat-message.bot {
-      background: #f5f5f4;
-      color: #1c1917;
+      background: white;
+      color: #111827;
       align-self: flex-start;
-      border-radius: 16px;
-      border-bottom-left-radius: 4px;
+      border-radius: 20px 20px 20px 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     
     .chat-message.user {
-      background: #1c1917;
+      background: #111827;
       color: white;
       align-self: flex-end;
-      border-radius: 16px;
-      border-bottom-right-radius: 4px;
+      border-radius: 20px 20px 6px 20px;
     }
     
     .chat-message.typing {
       display: flex;
-      gap: 4px;
-      padding: 16px 20px;
+      gap: 5px;
+      padding: 18px 22px;
     }
     
     .typing-dot {
-      width: 6px;
-      height: 6px;
-      background: #a8a29e;
+      width: 8px;
+      height: 8px;
+      background: #9ca3af;
       border-radius: 50%;
       animation: typingBounce 1.4s infinite ease-in-out;
     }
@@ -602,81 +589,84 @@ function wrapWithPremiumTemplate(
     
     @keyframes typingBounce {
       0%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-4px); }
+      40% { transform: translateY(-6px); }
     }
     
     #chatbot-input-area {
-      padding: 16px;
-      border-top: 1px solid #e7e5e4;
+      padding: 20px;
+      border-top: 1px solid #e5e7eb;
       display: flex;
-      gap: 10px;
+      gap: 12px;
       background: white;
     }
     
     #chatbot-input {
       flex: 1;
-      padding: 12px 16px;
-      border: 1px solid #e7e5e4;
-      border-radius: 12px;
+      padding: 14px 18px;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
       font-size: 14px;
       outline: none;
       transition: border-color 0.2s;
-      background: #fafaf9;
+      background: #f9fafb;
     }
     
     #chatbot-input:focus {
-      border-color: #1c1917;
+      border-color: #111827;
+      background: white;
     }
     
     #chatbot-send {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: #1c1917;
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      background: #111827;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.2s;
+      transition: all 0.2s;
     }
     
     #chatbot-send:hover {
-      opacity: 0.8;
+      background: #1f2937;
+      transform: scale(1.05);
     }
     
     #chatbot-send svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       color: white;
     }
     
     .quick-replies {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 10px;
+      gap: 8px;
+      margin-top: 12px;
     }
     
     .quick-reply {
-      padding: 6px 12px;
-      background: white;
-      border: 1px solid #e7e5e4;
-      color: #1c1917;
-      border-radius: 8px;
-      font-size: 12px;
+      padding: 8px 14px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      color: #374151;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
     }
     
     .quick-reply:hover {
-      background: #1c1917;
+      background: #111827;
       color: white;
-      border-color: #1c1917;
+      border-color: #111827;
     }
   </style>
 </head>
-<body class="bg-stone-50 text-stone-900 antialiased">
+<body class="bg-white text-gray-900 antialiased">
 ${html}
 
 <!-- AI Chatbot Widget -->
@@ -690,17 +680,17 @@ ${html}
       </div>
       <div id="chatbot-header-info">
         <h3>${lead.businessName}</h3>
-        <p>AI Assistant • Online</p>
+        <p>AI Assistant • Online now</p>
       </div>
       <button id="chatbot-close">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
       </button>
     </div>
     <div id="chatbot-messages">
       <div class="chat-message bot">
-        Hi! 👋 Welcome to ${lead.businessName}. I'm here to help you with any questions about our services. How can I assist you today?
+        Hi there! 👋 Welcome to ${lead.businessName}. How can I help you today?
         <div class="quick-replies">
           <button class="quick-reply" onclick="sendQuickReply('What services do you offer?')">Services</button>
           <button class="quick-reply" onclick="sendQuickReply('What are your hours?')">Hours</button>
@@ -709,7 +699,7 @@ ${html}
       </div>
     </div>
     <div id="chatbot-input-area">
-      <input type="text" id="chatbot-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+      <input type="text" id="chatbot-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
       <button id="chatbot-send" onclick="sendMessage()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
@@ -725,25 +715,19 @@ ${html}
 </div>
 
 <script>
-  // Initialize Lucide icons
   lucide.createIcons();
   
-  // Smooth scroll for anchor links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
       e.preventDefault();
-      document.querySelector(this.getAttribute('href')).scrollIntoView({
-        behavior: 'smooth'
-      });
+      document.querySelector(this.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
     });
   });
   
-  // Chatbot functionality
   const businessContext = ${JSON.stringify(chatbotContext)};
   
   function toggleChat() {
-    const window = document.getElementById('chatbot-window');
-    window.classList.toggle('open');
+    document.getElementById('chatbot-window').classList.toggle('open');
   }
   
   document.getElementById('chatbot-close').addEventListener('click', toggleChat);
@@ -762,19 +746,15 @@ ${html}
     const message = input.value.trim();
     if (!message) return;
     
-    // Add user message
     addMessage(message, 'user');
     input.value = '';
-    
-    // Show typing indicator
     showTyping();
     
-    // Generate response
     setTimeout(() => {
       hideTyping();
       const response = generateResponse(message);
       addMessage(response, 'bot');
-    }, 1000 + Math.random() * 1000);
+    }, 800 + Math.random() * 800);
   }
   
   function addMessage(text, type) {
@@ -797,44 +777,17 @@ ${html}
   }
   
   function hideTyping() {
-    const typing = document.getElementById('typing-indicator');
-    if (typing) typing.remove();
+    document.getElementById('typing-indicator')?.remove();
   }
   
   function generateResponse(message) {
     const msg = message.toLowerCase();
-    
-    // Services
-    if (msg.includes('service') || msg.includes('offer') || msg.includes('do you do') || msg.includes('what do you')) {
-      return businessContext.servicesResponse;
-    }
-    
-    // Hours
-    if (msg.includes('hour') || msg.includes('open') || msg.includes('close') || msg.includes('time')) {
-      return businessContext.hoursResponse;
-    }
-    
-    // Contact
-    if (msg.includes('contact') || msg.includes('phone') || msg.includes('call') || msg.includes('reach')) {
-      return businessContext.contactResponse;
-    }
-    
-    // Location
-    if (msg.includes('location') || msg.includes('address') || msg.includes('where') || msg.includes('find you')) {
-      return businessContext.locationResponse;
-    }
-    
-    // Price
-    if (msg.includes('price') || msg.includes('cost') || msg.includes('how much') || msg.includes('rate')) {
-      return businessContext.pricingResponse;
-    }
-    
-    // Booking
-    if (msg.includes('book') || msg.includes('appointment') || msg.includes('schedule') || msg.includes('reserve')) {
-      return businessContext.bookingResponse;
-    }
-    
-    // Default
+    if (msg.includes('service') || msg.includes('offer') || msg.includes('do you do')) return businessContext.servicesResponse;
+    if (msg.includes('hour') || msg.includes('open') || msg.includes('close')) return businessContext.hoursResponse;
+    if (msg.includes('contact') || msg.includes('phone') || msg.includes('call')) return businessContext.contactResponse;
+    if (msg.includes('location') || msg.includes('address') || msg.includes('where')) return businessContext.locationResponse;
+    if (msg.includes('price') || msg.includes('cost') || msg.includes('how much')) return businessContext.pricingResponse;
+    if (msg.includes('book') || msg.includes('appointment') || msg.includes('schedule')) return businessContext.bookingResponse;
     return businessContext.defaultResponse;
   }
 </script>
@@ -843,69 +796,18 @@ ${html}
 }
 
 function buildChatbotContext(lead: any): any {
-  const category = lead.category
   const name = lead.businessName
   const phone = lead.phone || '(555) 123-4567'
   const city = lead.city
-  
-  const categoryResponses: Record<string, any> = {
-    restaurant: {
-      servicesResponse: "At " + name + ", we offer a delicious menu featuring appetizers, main courses, desserts, and beverages. We also provide catering services for special events, takeout, and delivery options. Would you like to know about any specific dishes?",
-      hoursResponse: "We're open Monday to Thursday 11am-10pm, Friday & Saturday 11am-11pm, and Sunday 12pm-9pm. We recommend making reservations for weekend dinners!",
-      pricingResponse: "Our menu ranges from $12-35 for main courses. We also have lunch specials starting at $10. Would you like me to tell you about our current specials?",
-      bookingResponse: "I'd be happy to help you make a reservation! You can call us at " + phone + " or book online. How many guests and what date were you thinking?",
-    },
-    cafe: {
-      servicesResponse: "Welcome to " + name + "! We serve specialty coffee, espresso drinks, fresh pastries, breakfast items, and light lunch options. We also offer free WiFi and a cozy atmosphere for working or relaxing.",
-      hoursResponse: "We're open daily from 7am to 7pm. Early birds love our fresh-baked pastries that come out at 7:30am!",
-      pricingResponse: "Our coffee drinks range from $3-7, pastries $3-6, and breakfast/lunch items $8-15. We also have a loyalty program - ask about it on your next visit!",
-      bookingResponse: "No reservations needed - just walk in! For large groups or catering orders, please call us at " + phone + ".",
-    },
-    salon: {
-      servicesResponse: "At " + name + ", we offer haircuts, coloring, highlights, balayage, treatments, styling, and more. Our experienced stylists specialize in all hair types and the latest trends.",
-      hoursResponse: "We're open Tuesday to Saturday 9am-7pm. We're closed Sunday and Monday. Evening appointments available on Thursday and Friday!",
-      pricingResponse: "Haircuts start at $35, color services from $75, and highlights from $120. We offer free consultations to discuss your perfect look and provide accurate pricing.",
-      bookingResponse: "I'd love to help you book an appointment! Call us at " + phone + " or book online. Which service are you interested in?",
-    },
-    dentist: {
-      servicesResponse: name + " provides comprehensive dental care including cleanings, exams, fillings, crowns, whitening, Invisalign, implants, and emergency dental services. We accept most insurance plans.",
-      hoursResponse: "Our office is open Monday to Friday 8am-5pm, with early morning and late evening appointments available. We also offer Saturday hours twice a month.",
-      pricingResponse: "We accept most dental insurance plans. For uninsured patients, we offer affordable payment plans. A routine cleaning and exam starts at $150. Contact us for a detailed estimate.",
-      bookingResponse: "Ready to schedule your appointment? Call us at " + phone + " or request an appointment online. New patients welcome - we'll make your first visit comfortable!",
-    },
-    plumber: {
-      servicesResponse: name + " handles all plumbing needs: leak repairs, drain cleaning, water heater installation, pipe repairs, bathroom/kitchen plumbing, and 24/7 emergency services. Licensed and insured!",
-      hoursResponse: "We're available Monday to Saturday 7am-6pm for regular appointments. For emergencies, we offer 24/7 service - just call our emergency line!",
-      pricingResponse: "Service calls start at $75. We provide free estimates for larger jobs. No hidden fees - we'll give you upfront pricing before any work begins.",
-      bookingResponse: "Need a plumber? Call us at " + phone + " for same-day service when available. For emergencies, we can usually be there within an hour!",
-    },
-    gym: {
-      servicesResponse: name + " offers state-of-the-art equipment, group fitness classes, personal training, locker rooms, and more. We have cardio, strength training, and functional fitness areas.",
-      hoursResponse: "We're open 24/7 for members! Staffed hours are Monday-Friday 6am-10pm and weekends 8am-8pm. Personal trainers available by appointment.",
-      pricingResponse: "Memberships start at $29/month with no long-term contracts. We also offer day passes for $15. Ask about our current promotions and free trial!",
-      bookingResponse: "Ready to start your fitness journey? Come in for a free tour and trial workout, or call " + phone + " to speak with a membership advisor.",
-    },
-    spa: {
-      servicesResponse: name + " offers massages, facials, body treatments, manicures, pedicures, and wellness packages. Our skilled therapists create a peaceful escape for total relaxation.",
-      hoursResponse: "We're open Tuesday to Sunday 10am-8pm. We recommend booking in advance, especially for weekend appointments.",
-      pricingResponse: "Massages start at $80/hour, facials from $75, and we have spa packages starting at $150. Gift cards available for that special someone!",
-      bookingResponse: "Ready to relax? Book your treatment by calling " + phone + " or online. First-time guests receive 15% off their first service!",
-    },
-  }
-  
-  const defaultResponses = {
-    servicesResponse: "At " + name + ", we offer a wide range of professional services tailored to your needs. We pride ourselves on quality work and customer satisfaction. What specific service are you interested in?",
-    hoursResponse: "We're typically open Monday to Friday 9am-6pm, and Saturday 10am-4pm. For the most accurate hours, please call us at " + phone + ".",
-    pricingResponse: "Our pricing varies based on the service. We offer competitive rates and free estimates. Contact us at " + phone + " for detailed pricing information.",
-    bookingResponse: "We'd love to help you! Please call us at " + phone + " or visit us in " + city + " to schedule an appointment or get more information.",
-  }
-  
-  const responses = categoryResponses[category] || defaultResponses
+  const category = lead.category.replace(/_/g, ' ')
   
   return {
-    ...responses,
-    contactResponse: "You can reach us at " + phone + ". We're located in " + city + ". Feel free to call or visit us - we'd love to help you!",
-    locationResponse: "We're conveniently located in " + city + ". Call us at " + phone + " for directions or to schedule a visit!",
-    defaultResponse: "Thanks for your question! For the best assistance, please call us at " + phone + " or visit " + name + " in " + city + ". We're happy to help with anything you need!",
+    servicesResponse: `At ${name}, we offer a full range of ${category} services. We're known for quality work and customer satisfaction. Would you like to know more about any specific service?`,
+    hoursResponse: `We're open Monday through Friday 8am-6pm, and Saturday 9am-4pm. We're closed on Sundays. Feel free to call us at ${phone} to schedule!`,
+    contactResponse: `You can reach us at ${phone}. We're located in ${city} and always happy to help with any questions!`,
+    locationResponse: `We're proudly serving ${city} and surrounding areas. Call us at ${phone} for directions or to schedule a visit!`,
+    pricingResponse: `Our pricing varies based on the specific service needed. We offer free estimates! Call us at ${phone} or book online to get a quote.`,
+    bookingResponse: `We'd love to schedule you! You can book online using the booking button on this page, or call us directly at ${phone}.`,
+    defaultResponse: `Thanks for reaching out to ${name}! For the fastest response, give us a call at ${phone}. We're here to help with all your ${category} needs!`,
   }
 }

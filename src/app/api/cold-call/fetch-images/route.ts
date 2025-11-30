@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
     if (lead.generatedWebsite) {
       const existingImages = lead.generatedWebsite.customImages || []
       // Only add images that aren't already there
-      const newImages = [...new Set([...existingImages, ...images])].slice(0, 6)
+      const newImages = Array.from(new Set([...existingImages, ...images])).slice(0, 6)
 
       await (client as any).generatedWebsite.update({
         where: { id: lead.generatedWebsite.id },

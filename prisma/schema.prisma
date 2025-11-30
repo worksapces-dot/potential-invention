@@ -547,6 +547,15 @@ model ColdCallLead {
   // Notes
   notes           String?         @db.Text
   
+  // CRM Fields
+  nextFollowUp    DateTime?       // Next scheduled follow-up
+  lastContactedAt DateTime?       // Last time we contacted them
+  leadScore       Int?            // 1-100 score based on engagement
+  tags            String[]        // Custom tags for organization
+  
+  // Activity tracking
+  activities      LeadActivity[]
+  
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   
@@ -554,6 +563,42 @@ model ColdCallLead {
   @@index([status])
   @@index([category])
   @@index([city])
+  @@index([nextFollowUp])
+}
+
+// CRM Activity Log
+model LeadActivity {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  ColdCallLead    ColdCallLead    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId          String          @db.Uuid
+  
+  type            ActivityType
+  title           String
+  description     String?         @db.Text
+  
+  // Optional metadata
+  metadata        Json?           // Store extra data like email subject, call duration, etc.
+  
+  createdAt       DateTime        @default(now())
+  
+  @@index([leadId])
+  @@index([createdAt])
+}
+
+enum ActivityType {
+  NOTE
+  EMAIL_SENT
+  EMAIL_OPENED
+  EMAIL_REPLIED
+  CALL
+  MEETING
+  WEBSITE_GENERATED
+  WEBSITE_VIEWED
+  STATUS_CHANGE
+  DEAL_CREATED
+  DEAL_PAID
+  FOLLOW_UP_SCHEDULED
 }
 
 model GeneratedWebsite {
@@ -566,6 +611,9 @@ model GeneratedWebsite {
   template        String          // restaurant, salon, etc.
   previewUrl      String?         // shareable preview link
   content         Json            // stored website config/content
+  
+  // Custom subdomain (e.g., "joes-plumbing" -> joes-plumbing.yourdomain.com)
+  subdomain       String?         @unique
   
   // Custom images (uploaded by user for client)
   customImages    String[]        // Array of image URLs (Vercel Blob)
@@ -590,6 +638,8 @@ model GeneratedWebsite {
   
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  
+  @@index([subdomain])
 }
 
 // ============================================================================
@@ -731,6 +781,102 @@ model WebsiteAnalytics {
   @@index([date])
 }
 
+// ============================================================================
+// COLD CALL ANALYTICS - CONVERSION FUNNEL & ROI TRACKING
+// ============================================================================
+
+model ColdCallAnalytics {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String          @db.Uuid
+  date            DateTime        @db.Date
+  
+  // Funnel Metrics (daily snapshots)
+  leadsCreated    Int             @default(0)
+  leadsContacted  Int             @default(0)
+  leadsInterested Int             @default(0)
+  leadsNegotiating Int            @default(0)
+  leadsWon        Int             @default(0)
+  leadsLost       Int             @default(0)
+  
+  // Outreach Metrics
+  emailsSent      Int             @default(0)
+  emailsOpened    Int             @default(0)
+  emailsClicked   Int             @default(0)
+  emailsReplied   Int             @default(0)
+  
+  // Website Metrics
+  websitesGenerated Int           @default(0)
+  websiteViews    Int             @default(0)
+  
+  // Revenue Metrics (in cents)
+  dealsCreated    Int             @default(0)
+  dealsPaid       Int             @default(0)
+  revenueGenerated Int            @default(0)
+  platformFees    Int             @default(0)
+  netRevenue      Int             @default(0)
+  
+  // Recurring Revenue
+  subscriptionsCreated Int        @default(0)
+  recurringRevenue Int            @default(0)
+  
+  createdAt       DateTime        @default(now())
+  
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// Track individual lead status changes for funnel analysis
+model LeadStatusHistory {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  leadId          String          @db.Uuid
+  userId          String          @db.Uuid
+  
+  fromStatus      LeadStatus?
+  toStatus        LeadStatus
+  
+  // Time spent in previous status (in seconds)
+  timeInStatus    Int?
+  
+  // Optional notes
+  notes           String?
+  
+  createdAt       DateTime        @default(now())
+  
+  @@index([leadId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Track costs for ROI calculation
+model ColdCallCost {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String          @db.Uuid
+  
+  type            CostType
+  description     String?
+  amount          Int             // in cents
+  
+  // Optional link to specific lead
+  leadId          String?         @db.Uuid
+  
+  date            DateTime        @db.Date
+  createdAt       DateTime        @default(now())
+  
+  @@index([userId])
+  @@index([date])
+  @@index([type])
+}
+
+enum CostType {
+  AI_GENERATION       // Cost of AI website generation
+  EMAIL_SENDING       // Email service costs
+  LEAD_ACQUISITION    // Cost to acquire leads
+  MARKETING           // Marketing/advertising costs
+  OTHER               // Miscellaneous costs
+}
+
 model OutreachEmail {
   id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   
@@ -762,20 +908,123 @@ model ColdCallDeal {
   leadId          String          @unique @db.Uuid
   
   // Deal info
-  amount          Int             // in cents
+  amount          Int             // in cents (one-time setup fee)
   platformFee     Int             // our cut
   sellerPayout    Int             // user's cut
+  
+  // Recurring billing (monthly hosting)
+  isRecurring         Boolean     @default(false)
+  recurringAmount     Int?        // monthly fee in cents
+  recurringPlatformFee Int?       // our cut of monthly
+  recurringSellerPayout Int?      // user's cut of monthly
+  stripeSubscriptionId String?    @unique
+  nextBillingDate     DateTime?
   
   // Stripe
   stripeInvoiceId String?         @unique
   stripePaymentId String?         @unique
+  stripePriceId   String?         // for recurring
+  stripeProductId String?         // for recurring
   
   status          DealStatus      @default(PENDING)
+  
+  // Contract/Proposal
+  proposal        ColdCallProposal?
+  
+  // Payment reminders
+  reminders       PaymentReminder[]
+  
+  // Refund info
+  refundedAt      DateTime?
+  refundReason    String?
+  refundAmount    Int?
   
   paidAt          DateTime?
   createdAt       DateTime        @default(now())
   
   @@index([status])
+  @@index([nextBillingDate])
+}
+
+// Contract/Proposal for cold call deals
+model ColdCallProposal {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  ColdCallDeal    ColdCallDeal    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  dealId          String          @unique @db.Uuid
+  
+  // Proposal content
+  title           String
+  description     String          @db.Text
+  scope           String[]        // List of deliverables
+  timeline        String?         // e.g., "2 weeks"
+  
+  // Terms
+  paymentTerms    String?         // e.g., "50% upfront, 50% on completion"
+  revisions       Int             @default(2) // Number of revisions included
+  
+  // Client info
+  clientName      String?
+  clientEmail     String?
+  clientPhone     String?
+  
+  // Status
+  status          ProposalStatus  @default(DRAFT)
+  sentAt          DateTime?
+  viewedAt        DateTime?
+  acceptedAt      DateTime?
+  declinedAt      DateTime?
+  
+  // Signature
+  clientSignature String?         // Base64 or URL
+  signedAt        DateTime?
+  
+  // Expiry
+  expiresAt       DateTime?
+  
+  // Public access token
+  accessToken     String          @unique @default(dbgenerated("gen_random_uuid()"))
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([status])
+  @@index([accessToken])
+}
+
+// Payment reminders for pending invoices
+model PaymentReminder {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  ColdCallDeal    ColdCallDeal    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  dealId          String          @db.Uuid
+  
+  // Reminder details
+  type            ReminderType    @default(EMAIL)
+  message         String?         @db.Text
+  
+  // Status
+  scheduledFor    DateTime
+  sentAt          DateTime?
+  
+  createdAt       DateTime        @default(now())
+  
+  @@index([dealId])
+  @@index([scheduledFor])
+}
+
+enum ProposalStatus {
+  DRAFT
+  SENT
+  VIEWED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum ReminderType {
+  EMAIL
+  SMS
 }
 
 enum LeadStatus {
@@ -792,6 +1041,8 @@ enum DealStatus {
   PAID
   CANCELLED
   REFUNDED
+  ACTIVE_SUBSCRIPTION  // For recurring billing
+  SUBSCRIPTION_CANCELLED
 }
 
 // ============================================================================
