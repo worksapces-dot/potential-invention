@@ -171,131 +171,96 @@ function HeroSection() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-muted/50 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-muted/50 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl" />
       </div>
 
       <div className="container relative mx-auto px-4 lg:px-8">
         <div className="mx-auto max-w-5xl text-center">
-          {/* Top badges */}
-          <div className="mb-8 md:mb-10 flex flex-wrap items-center justify-center gap-3 animate-fade-in">
-            <span className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-medium text-foreground">
+          {/* Top badge */}
+          <div className="mb-8 md:mb-12 animate-fade-in">
+            <span className="inline-flex items-center gap-2 rounded-full bg-muted px-5 py-2.5 text-sm font-medium text-foreground">
               <Sparkles className="h-4 w-4" />
-              DM Automation
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 px-4 py-2 text-sm font-medium text-foreground">
-              <Target className="h-4 w-4 text-blue-500" />
-              Cold Calling AI
+              AI-Powered Cold Calling
             </span>
           </div>
 
           {/* Main headline */}
           <div className="mb-8 md:mb-10">
             <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.1] animate-slide-up">
-              Find clients.
-              <br />
-              <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-                Close deals.
-              </span>
+              Turn cold leads into
             </h1>
 
             {/* Pills with floating icons inline */}
-            <div className="mt-6 md:mt-8 flex flex-wrap items-center justify-center gap-3 md:gap-4 lg:gap-5 animate-slide-up delay-100">
+            <div className="mt-4 md:mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4 lg:gap-5 animate-slide-up delay-100">
               {/* Building icon - animated floating */}
               <div className="hidden sm:block animate-float">
-                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-2xl shadow-blue-500/25 transition-all duration-300 hover:scale-110">
-                  <Building2 className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-white" />
+                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-background shadow-2xl border border-border/50 transition-all duration-300 hover:scale-110 hover:shadow-3xl">
+                  <Building2 className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-foreground transition-transform hover:scale-110" />
                 </div>
               </div>
 
-              {/* Leads pill */}
+              {/* Clients pill */}
               <span className="inline-flex items-center gap-2 md:gap-3 rounded-full bg-foreground px-5 py-2.5 md:px-7 md:py-3.5 text-background shadow-xl">
                 <Users className="h-4 w-4 md:h-5 md:w-5" />
-                <span className="text-xl md:text-2xl lg:text-3xl font-bold">Leads</span>
-              </span>
-
-              <span className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold">→</span>
-
-              {/* Clients pill */}
-              <span className="inline-flex items-center gap-2 md:gap-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-2.5 md:px-7 md:py-3.5 text-white shadow-xl shadow-purple-500/25">
-                <TrendingUp className="h-4 w-4 md:h-5 md:w-5" />
                 <span className="text-xl md:text-2xl lg:text-3xl font-bold">Clients</span>
               </span>
 
-              {/* Globe icon - animated floating with delay */}
+              <span className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold">&</span>
+
+              {/* Revenue pill */}
+              <span className="inline-flex items-center gap-2 md:gap-3 rounded-full bg-foreground px-5 py-2.5 md:px-7 md:py-3.5 text-background shadow-xl">
+                <TrendingUp className="h-4 w-4 md:h-5 md:w-5" />
+                <span className="text-xl md:text-2xl lg:text-3xl font-bold">Revenue</span>
+              </span>
+
+              {/* Rocket icon - animated floating with delay */}
               <div className="hidden sm:block animate-float-reverse" style={{ animationDelay: "0.5s" }}>
-                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-2xl shadow-purple-500/25 transition-all duration-300 hover:scale-110">
-                  <Rocket className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-white" />
+                <div className="flex h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-2xl bg-background shadow-2xl border border-border/50 transition-all duration-300 hover:scale-110 hover:shadow-3xl">
+                  <Rocket className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-foreground transition-transform hover:scale-110" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Subtitle */}
-          <p className="mx-auto mb-10 md:mb-12 max-w-3xl text-lg md:text-xl lg:text-2xl text-muted-foreground leading-relaxed animate-slide-up delay-200">
-            AI-powered cold calling that finds local businesses without websites,
+          <p className="mx-auto mb-10 md:mb-12 max-w-2xl text-lg md:text-xl lg:text-2xl italic text-muted-foreground leading-relaxed animate-slide-up delay-200">
+            Find local businesses without websites, generate stunning previews,
             <br className="hidden md:block" />
-            generates stunning previews, and helps you close deals on autopilot.
+            send proposals, and close deals — all on autopilot.
           </p>
 
-          {/* Feature bullets - Cold Call focused */}
+          {/* Feature bullets */}
           <div className="mb-10 md:mb-14 animate-slide-up delay-300">
-            <p className="mb-5 text-sm text-muted-foreground tracking-wider uppercase">Everything you need to grow...</p>
+            <p className="mb-5 text-sm text-muted-foreground tracking-wider uppercase">What you get...</p>
             <div className="flex flex-wrap items-center justify-center gap-x-5 md:gap-x-8 gap-y-3 text-sm md:text-base font-medium">
               {["AI Lead Discovery", "Website Generator", "Auto Proposals", "Payment Links"].map((item) => (
                 <span key={item} className="text-foreground flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
                   {item}
                 </span>
               ))}
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 md:gap-x-8 gap-y-3 text-sm md:text-base font-medium">
-              {["DM Automation", "Comment Replies", "Analytics Dashboard", "Recurring Billing"].map((item) => (
+              {["Recurring Billing", "Analytics Dashboard"].map((item) => (
                 <span key={item} className="text-foreground flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
                   {item}
                 </span>
               ))}
             </div>
           </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up delay-400">
+          {/* CTA Button */}
+          <div className="flex flex-col items-center gap-5 animate-slide-up delay-400">
             <Link href="/dashboard">
               <Button
                 size="lg"
-                className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 rounded-full shadow-xl shadow-purple-500/25 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
                 Start finding clients
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-            <Link href="/dashboard">
-              <Button
-                size="lg"
-                variant="outline"
-                className="group h-14 md:h-16 px-8 md:px-10 text-base md:text-lg rounded-full transition-all duration-300 hover:-translate-y-1"
-              >
-                <InstagramIcon className="mr-2 h-5 w-5" />
-                Automate DMs
-              </Button>
-            </Link>
-          </div>
-          <p className="mt-5 text-sm md:text-base text-muted-foreground">Free plan available. No credit card required.</p>
-
-          {/* Stats row */}
-          <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto animate-slide-up delay-500">
-            <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold">500+</p>
-              <p className="text-sm text-muted-foreground mt-1">Deals Closed</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold">10K+</p>
-              <p className="text-sm text-muted-foreground mt-1">Leads Found</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold">$2M+</p>
-              <p className="text-sm text-muted-foreground mt-1">Revenue Generated</p>
-            </div>
+            <p className="text-sm md:text-base text-muted-foreground">Free plan available. No credit card required.</p>
           </div>
         </div>
       </div>
@@ -309,39 +274,39 @@ function HeroSection() {
 
 const features = [
   {
-    icon: MessageCircle,
-    title: "Auto DM Replies",
-    description: "Automatically respond to Instagram DMs based on keywords. Never miss a lead or customer inquiry again.",
+    icon: Target,
+    title: "AI Lead Discovery",
+    description: "Find local businesses without websites automatically. Our AI scans directories and identifies perfect prospects.",
     tag: "Popular",
   },
   {
-    icon: Target,
-    title: "Keyword Triggers",
-    description: "Set up custom keywords that trigger automated responses. Perfect for giveaways, promos, and lead capture.",
-    tag: null,
+    icon: Rocket,
+    title: "Website Generator",
+    description: "Generate stunning website previews for prospects in seconds. Show them what they're missing.",
+    tag: "New",
   },
   {
-    icon: Bot,
-    title: "Smart AI Responses",
-    description: "Let AI craft personalized replies based on context. Engage followers with human-like conversations.",
+    icon: Send,
+    title: "Auto Proposals",
+    description: "Create and send professional proposals automatically. Include pricing, scope, and payment links.",
     tag: "Pro",
   },
   {
-    icon: Heart,
-    title: "Comment Automation",
-    description: "Auto-reply to comments on your posts. Turn engagement into conversations and sales opportunities.",
+    icon: TrendingUp,
+    title: "Payment Links",
+    description: "Send payment links via email automatically. Accept one-time payments or set up recurring billing.",
     tag: null,
   },
   {
     icon: BarChart3,
     title: "Analytics Dashboard",
-    description: "Track DMs sent, comments replied, and conversion rates. Measure what matters for your growth.",
-    tag: "New",
+    description: "Track leads, deals, revenue, and conversion rates. See your entire sales pipeline at a glance.",
+    tag: null,
   },
   {
-    icon: Rocket,
-    title: "Cold Outreach",
-    description: "Find and reach potential clients automatically. Generate leads and grow your business with AI-powered outreach.",
+    icon: Bot,
+    title: "AI Follow-ups",
+    description: "Automated follow-up sequences that feel personal. Never let a lead go cold again.",
     tag: "Pro",
   },
 ]
@@ -356,10 +321,10 @@ function FeaturesSection() {
             Features
           </span>
           <h2 className="mb-5 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-            Everything you need to automate Instagram
+            Everything you need to close more deals
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground">
-            From DM automation to AI-powered responses, grow your Instagram on autopilot.
+            From lead discovery to payment collection, automate your entire sales process.
           </p>
         </div>
 
@@ -395,21 +360,21 @@ function FeaturesSection() {
 const steps = [
   {
     number: "01",
-    icon: Link2,
-    title: "Connect Instagram",
-    description: "Link your Instagram account in seconds. Secure OAuth connection, no password sharing required.",
+    icon: Target,
+    title: "Find Leads",
+    description: "Enter a location and business type. Our AI finds businesses without websites who need your help.",
   },
   {
     number: "02",
-    icon: Play,
-    title: "Set Up Triggers",
-    description: "Create keyword triggers and AI prompts. Define what happens when someone comments or DMs you.",
+    icon: Rocket,
+    title: "Generate & Send",
+    description: "Generate website previews and send proposals automatically. Include pricing and payment links.",
   },
   {
     number: "03",
-    icon: Rocket,
-    title: "Watch It Work",
-    description: "Activate your automation and let it run 24/7. Track performance in your analytics dashboard.",
+    icon: TrendingUp,
+    title: "Close Deals",
+    description: "Track responses, send follow-ups, and collect payments. Watch your revenue grow on autopilot.",
   },
 ]
 
@@ -422,10 +387,10 @@ function HowItWorksSection() {
             How It Works
           </span>
           <h2 className="mb-5 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-            Start automating in 3 steps
+            Start closing deals in 3 steps
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground">
-            Connect your Instagram, set up triggers, and let AI handle the rest.
+            Find leads, generate websites, and close deals — all on autopilot.
           </p>
         </div>
 
@@ -465,23 +430,23 @@ function HowItWorksSection() {
 const benefits = [
   {
     icon: Clock,
-    title: "Reply Instantly 24/7",
-    description: "Never miss a DM or comment again. Respond to followers even while you sleep.",
+    title: "Save 20+ Hours/Week",
+    description: "Stop manually searching for leads. Let AI do the prospecting while you focus on closing.",
   },
   {
     icon: TrendingUp,
-    title: "Convert More Leads",
-    description: "Turn casual commenters into paying customers with automated follow-up sequences.",
+    title: "10x Your Pipeline",
+    description: "Find hundreds of qualified leads in minutes. Scale your outreach without hiring.",
   },
   {
     icon: CheckCircle2,
-    title: "Grow Engagement",
-    description: "Boost your engagement rate by responding to every comment and DM automatically.",
+    title: "Close More Deals",
+    description: "Professional proposals and automated follow-ups mean higher conversion rates.",
   },
   {
     icon: Bot,
-    title: "AI That Sounds Like You",
-    description: "Smart AI responses that match your brand voice. Personal touch at scale.",
+    title: "AI That Sells For You",
+    description: "Smart website previews that show prospects exactly what they need. Sells itself.",
   },
 ]
 
@@ -496,10 +461,10 @@ function BenefitsSection() {
                 Why Slide
               </span>
               <h2 className="mb-6 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-                Why creators choose Slide
+                Why agencies choose Slide
               </h2>
               <p className="mb-10 text-lg md:text-xl text-muted-foreground leading-relaxed">
-                Join thousands of creators and businesses automating their Instagram engagement.
+                Join hundreds of web designers and agencies automating their client acquisition.
               </p>
 
               <div className="grid gap-6 sm:grid-cols-2">
@@ -873,17 +838,30 @@ function Footer() {
           </div>
 
           {[
-            { title: "Product", links: ["Features", "Pricing", "Changelog"] },
-            { title: "Resources", links: ["Documentation", "Tutorials", "Blog", "Support"] },
-            { title: "Company", links: ["About", "Privacy", "Terms"] },
+            { title: "Product", links: [
+              { label: "Features", href: "#features" },
+              { label: "Pricing", href: "#pricing" },
+              { label: "Changelog", href: "/changelog" },
+            ]},
+            { title: "Resources", links: [
+              { label: "Documentation", href: "#" },
+              { label: "Tutorials", href: "#" },
+              { label: "Blog", href: "#" },
+              { label: "Support", href: "#" },
+            ]},
+            { title: "Company", links: [
+              { label: "About", href: "#" },
+              { label: "Privacy", href: "/privacy" },
+              { label: "Terms", href: "/terms" },
+            ]},
           ].map((section) => (
             <div key={section.title}>
               <h4 className="mb-5 font-semibold">{section.title}</h4>
               <ul className="space-y-4 text-muted-foreground">
                 {section.links.map((link) => (
-                  <li key={link}>
-                    <Link href="#" className="transition-colors hover:text-foreground">
-                      {link}
+                  <li key={link.label}>
+                    <Link href={link.href} className="transition-colors hover:text-foreground">
+                      {link.label}
                     </Link>
                   </li>
                 ))}
