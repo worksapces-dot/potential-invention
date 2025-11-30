@@ -13,7 +13,7 @@ type GmailStatus = {
 }
 
 export function GmailConnect({ redirectTo }: { redirectTo?: string }) {
-  const [status, setStatus] = useState<GmailStatus | null>(null)
+  const [status, setStatus] = useState<GmailStatus>({ connected: false, email: null, senderName: null })
   const [isLoading, setIsLoading] = useState(true)
   const [isDisconnecting, setIsDisconnecting] = useState(false)
 
@@ -27,9 +27,14 @@ export function GmailConnect({ redirectTo }: { redirectTo?: string }) {
       const data = await response.json()
       if (response.ok) {
         setStatus(data)
+      } else {
+        // If API fails, show connect button
+        setStatus({ connected: false, email: null, senderName: null })
       }
     } catch (error) {
-      console.error('Failed to fetch Gmail status')
+      console.error('Failed to fetch Gmail status:', error)
+      // If API fails, show connect button
+      setStatus({ connected: false, email: null, senderName: null })
     } finally {
       setIsLoading(false)
     }
@@ -64,7 +69,7 @@ export function GmailConnect({ redirectTo }: { redirectTo?: string }) {
     )
   }
 
-  if (status?.connected) {
+  if (status.connected) {
     return (
       <Card className="p-4 bg-green-500/10 border-green-500/20">
         <div className="flex items-center justify-between">
@@ -95,6 +100,7 @@ export function GmailConnect({ redirectTo }: { redirectTo?: string }) {
     )
   }
 
+  // Always show connect button if not connected
   return (
     <Card className="p-4 bg-orange-500/10 border-orange-500/20">
       <div className="flex items-center justify-between">
