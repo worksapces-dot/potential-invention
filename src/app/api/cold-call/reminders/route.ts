@@ -3,8 +3,6 @@ import { currentUser } from '@clerk/nextjs/server'
 import { client } from '@/lib/prisma'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 // GET - List reminders for user's deals
 export async function GET(req: NextRequest) {
   try {
