@@ -51,6 +51,63 @@ export async function POST(req: Request) {
           
           console.log(`Pro subscription activated for user ${clerkId}`)
         }
+        
+        // Handle Cold Call deal payment (from payment links)
+        if (session.metadata?.type === 'cold_call_website' && session.metadata?.dealId) {
+          const { dealId, leadId, userId } = session.metadata
+          
+          const deal = await (client.coldCallDeal as any).findUnique({
+            where: { id: dealId },
+            include: { ColdCallLead: true },
+          })
+          
+          if (deal && deal.status === 'PENDING') {
+            // Get seller's Stripe Connect account
+            const seller = await client.user.findUnique({
+              where: { id: deal.ColdCallLead.userId },
+              select: { stripeConnectId: true, stripeConnectEnabled: true },
+            })
+            
+            // Transfer seller payout to their Connect account
+            if (seller?.stripeConnectId && seller?.stripeConnectEnabled) {
+              try {
+                await stripe.transfers.create({
+                  amount: deal.sellerPayout,
+                  currency: 'usd',
+                  destination: seller.stripeConnectId,
+                  transfer_group: `deal_${dealId}`,
+                  metadata: {
+                    dealId: deal.id,
+                    leadId: deal.leadId,
+                  },
+                })
+                console.log(`Transferred ${deal.sellerPayout} cents to seller ${seller.stripeConnectId}`)
+              } catch (transferError: any) {
+                console.error('Transfer to seller failed:', transferError.message)
+                // Continue - don't fail the whole webhook
+              }
+            } else {
+              console.log(`Seller ${deal.ColdCallLead.userId} has no Connect account - payout pending`)
+            }
+            
+            // Update deal status
+            await (client.coldCallDeal as any).update({
+              where: { id: dealId },
+              data: {
+                status: 'PAID',
+                paidAt: new Date(),
+              },
+            })
+            
+            // Update lead status
+            await client.coldCallLead.update({
+              where: { id: leadId },
+              data: { status: 'WON' },
+            })
+            
+            console.log(`Cold call deal ${dealId} marked as paid via checkout session`)
+          }
+        }
         break
       }
 
@@ -78,7 +135,63 @@ export async function POST(req: Request) {
       }
 
       case 'payment_intent.succeeded': {
-        // Handle other payment successes if needed
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        
+        // Check if this is a cold call deal payment
+        if (paymentIntent.metadata?.dealId) {
+          const { dealId, leadId } = paymentIntent.metadata
+          
+          // Get the deal and seller info
+          const deal = await (client.coldCallDeal as any).findUnique({
+            where: { id: dealId },
+            include: {
+              ColdCallLead: true,
+            },
+          })
+          
+          if (deal) {
+            // Get seller's Stripe Connect account
+            const seller = await client.user.findUnique({
+              where: { id: deal.ColdCallLead.userId },
+              select: { stripeConnectId: true, stripeConnectEnabled: true },
+            })
+            
+            // Transfer seller payout to their Connect account
+            if (seller?.stripeConnectId && seller?.stripeConnectEnabled) {
+              try {
+                await stripe.transfers.create({
+                  amount: deal.sellerPayout,
+                  currency: 'usd',
+                  destination: seller.stripeConnectId,
+                  metadata: {
+                    dealId: deal.id,
+                    leadId: deal.leadId,
+                  },
+                })
+                console.log(`Transferred ${deal.sellerPayout} cents to seller ${seller.stripeConnectId}`)
+              } catch (transferError: any) {
+                console.error('Transfer to seller failed:', transferError.message)
+              }
+            }
+            
+            // Update deal status
+            await (client.coldCallDeal as any).update({
+              where: { id: dealId },
+              data: {
+                status: 'PAID',
+                paidAt: new Date(),
+              },
+            })
+            
+            // Update lead status
+            await client.coldCallLead.update({
+              where: { id: leadId },
+              data: { status: 'WON' },
+            })
+            
+            console.log(`Cold call deal ${dealId} marked as paid`)
+          }
+        }
         break
       }
 

@@ -70,7 +70,18 @@ export async function POST(req: NextRequest) {
       currency: 'usd',
     })
 
-    // Create Stripe Payment Link
+    // Create deal record first to get the ID
+    const deal = await client.coldCallDeal.create({
+      data: {
+        leadId: lead.id,
+        amount: amount,
+        platformFee: platformFee,
+        sellerPayout: sellerPayout,
+        status: 'PENDING',
+      },
+    })
+
+    // Create Stripe Payment Link with deal metadata
     const paymentLink = await stripe.paymentLinks.create({
       line_items: [
         {
@@ -79,9 +90,18 @@ export async function POST(req: NextRequest) {
         },
       ],
       metadata: {
+        dealId: deal.id,
         leadId: lead.id,
         userId: dbUser.id,
         type: 'cold_call_website',
+      },
+      payment_intent_data: {
+        metadata: {
+          dealId: deal.id,
+          leadId: lead.id,
+          userId: dbUser.id,
+          type: 'cold_call_website',
+        },
       },
       after_completion: {
         type: 'redirect',
@@ -91,17 +111,13 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Create deal record
-    const deal = await client.coldCallDeal.create({
-      data: {
-        leadId: lead.id,
-        amount: amount,
-        platformFee: platformFee,
-        sellerPayout: sellerPayout,
-        stripePaymentId: paymentLink.id,
-        status: 'PENDING',
-      },
+    // Update deal with payment link ID
+    await client.coldCallDeal.update({
+      where: { id: deal.id },
+      data: { stripePaymentId: paymentLink.id },
     })
+
+
 
     // Update lead status
     await client.coldCallLead.update({
