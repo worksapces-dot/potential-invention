@@ -60,6 +60,7 @@ type Lead = {
   rating: number | null
   reviewCount: number | null
   googleMapsUrl: string | null
+  source?: string
 }
 
 export default function FindLeadsPage() {
@@ -238,8 +239,84 @@ export default function FindLeadsPage() {
         </div>
       </Card>
 
+      {/* Loading state with aesthetic animation */}
+      {isSearching && (
+        <Card className="p-16 bg-background/50 border-border/50">
+          <div className="flex flex-col items-center gap-8">
+            {/* Animated search visualization */}
+            <div className="relative h-20 w-20">
+              {/* Outer pulsing rings */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-32 w-32 rounded-full border border-primary/20 animate-ping" style={{ animationDuration: '2s' }} />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-24 w-24 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.2s' }} />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-16 w-16 rounded-full border border-primary/40 animate-ping" style={{ animationDuration: '1s', animationDelay: '0.4s' }} />
+              </div>
+              
+              {/* Center icon */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border border-primary/20">
+                  <Search className="h-8 w-8 text-primary animate-pulse" />
+                </div>
+              </div>
+              
+              {/* Orbiting dots */}
+              <div className="absolute inset-0 animate-spin" style={{ animationDuration: '3s' }}>
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                </div>
+              </div>
+              <div className="absolute inset-0 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }}>
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary/60" />
+                </div>
+              </div>
+              <div className="absolute inset-0 animate-spin" style={{ animationDuration: '5s' }}>
+                <div className="absolute top-1/2 -right-8 -translate-y-1/2">
+                  <div className="h-1 w-1 rounded-full bg-primary/40" />
+                </div>
+              </div>
+            </div>
+
+            {/* Loading text */}
+            <div className="text-center space-y-2 mt-8">
+              <h3 className="text-xl font-semibold">Scanning for businesses...</h3>
+              <p className="text-muted-foreground max-w-md">
+                Searching {category ? businessCategories.find(c => c.value === category)?.label?.toLowerCase() : 'businesses'} in {city || 'your area'}
+              </p>
+            </div>
+
+            {/* Animated progress indicators */}
+            <div className="flex items-center gap-1.5">
+              <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+
+            {/* Status steps */}
+            <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 animate-pulse">
+                <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                <span>Connecting to search providers</span>
+              </div>
+              <div className="flex items-center gap-2 animate-pulse" style={{ animationDelay: '0.5s' }}>
+                <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
+                <span>Analyzing business listings</span>
+              </div>
+              <div className="flex items-center gap-2 animate-pulse" style={{ animationDelay: '1s' }}>
+                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                <span>Filtering businesses without websites</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Results */}
-      {leads.length > 0 && (
+      {!isSearching && leads.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">
@@ -258,7 +335,14 @@ export default function FindLeadsPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold truncate">{lead.businessName}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold truncate">{lead.businessName}</h3>
+                      {lead.source && (
+                        <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                          {lead.source}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground capitalize">
                       {lead.category.replace('_', ' ')}
                     </p>

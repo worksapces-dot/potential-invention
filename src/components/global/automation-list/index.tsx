@@ -2,17 +2,37 @@
 import { usePaths } from '@/hooks/user-nav'
 import { cn, getMonth } from '@/lib/utils'
 import Link from 'next/link'
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import GradientButton from '../gradient-button'
 import { Button } from '@/components/ui/button'
 import { useQueryAutomations } from '@/hooks/user-queries'
 import CreateAutomation from '../create-automation'
 import { useMutationDataState } from '@/hooks/use-mutation-data'
+import FreeTierBanner from '../free-tier-banner'
+import { onUserInfo } from '@/actions/user'
 
 type Props = {}
 
+const FREE_AUTOMATION_LIMIT = 1
+
 const AutomationList = (props: Props) => {
   const { data } = useQueryAutomations()
+  const [isPro, setIsPro] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const result = await onUserInfo()
+        if (result.status === 200 && result.data) {
+          setIsPro(result.data.subscription?.plan === 'PRO')
+        }
+      } catch (error) {
+        console.error('Failed to check subscription:', error)
+        setIsPro(false)
+      }
+    }
+    checkSubscription()
+  }, [])
 
   const { latestVariable } = useMutationDataState(['create-automation'])
   console.log(latestVariable)
@@ -31,17 +51,36 @@ const AutomationList = (props: Props) => {
     return { data: [] as any[] }
   }, [latestVariable, data])
 
+  const automationCount = data?.data?.length || 0
+  const showFreeBanner = isPro === false
+
   if (data?.status !== 200 || !Array.isArray(data?.data) || data.data.length <= 0) {
     return (
-      <div className="h-[70vh] flex justify-center items-center flex-col gap-y-3">
-        <h3 className="text-lg text-gray-400">No Automations </h3>
-        <CreateAutomation />
+      <div className="flex flex-col">
+        {showFreeBanner && (
+          <FreeTierBanner 
+            currentCount={0} 
+            maxCount={FREE_AUTOMATION_LIMIT} 
+            feature="Automations" 
+          />
+        )}
+        <div className="h-[60vh] flex justify-center items-center flex-col gap-y-3">
+          <h3 className="text-lg text-gray-400">No Automations </h3>
+          <CreateAutomation />
+        </div>
       </div>
     )
   }
 
   return (
     <div className="flex flex-col gap-y-3">
+      {showFreeBanner && (
+        <FreeTierBanner 
+          currentCount={automationCount} 
+          maxCount={FREE_AUTOMATION_LIMIT} 
+          feature="Automations" 
+        />
+      )}
       {(optimisticUiData.data || []).map((automation) => {
         const keywords = Array.isArray(automation.keywords)
           ? automation.keywords

@@ -50,6 +50,12 @@ model User {
   stripeConnectId       String?   @unique
   stripeConnectEnabled  Boolean   @default(false)
   stripeOnboardingComplete Boolean @default(false)
+  
+  // Deal Finder AI
+  dealFinderProfile DealFinderProfile?
+  
+  // Notifications
+  notifications Notification[]
 }
 
 
@@ -561,8 +567,168 @@ model GeneratedWebsite {
   previewUrl      String?         // shareable preview link
   content         Json            // stored website config/content
   
+  // Custom images (uploaded by user for client)
+  customImages    String[]        // Array of image URLs (Vercel Blob)
+  logoUrl         String?         // Custom logo URL
+  
+  // SEO settings
+  seoTitle        String?         // Custom SEO title
+  seoDescription  String?         // Custom meta description
+  seoKeywords     String[]        // SEO keywords
+  
+  // Booking settings
+  bookingEnabled  Boolean         @default(true)
+  bookingSettings Json?           // { services: [], hours: {}, duration: 30 }
+  
+  // Client access
+  clientAccess    ClientAccess?
+  
+  // Analytics & Bookings
+  analytics       WebsiteAnalytics[]
+  bookings        Booking[]
+  services        BookingService[]
+  
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+}
+
+// ============================================================================
+// CLIENT ACCESS & DASHBOARD
+// ============================================================================
+
+model ClientAccess {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  GeneratedWebsite GeneratedWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  websiteId       String          @unique @db.Uuid
+  
+  // Client credentials (simple email/password for business owner)
+  email           String
+  passwordHash    String
+  
+  // Access token for sessions
+  accessToken     String?         @unique
+  tokenExpiresAt  DateTime?
+  
+  // Settings
+  emailNotifications Boolean      @default(true)
+  
+  lastLoginAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([email])
+}
+
+// ============================================================================
+// BOOKING SYSTEM
+// ============================================================================
+
+model BookingService {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  GeneratedWebsite GeneratedWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  websiteId       String          @db.Uuid
+  
+  name            String          // "Haircut", "Oil Change", "Consultation"
+  description     String?
+  duration        Int             // in minutes
+  price           Int             // in cents
+  
+  active          Boolean         @default(true)
+  
+  bookings        Booking[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([websiteId])
+}
+
+model Booking {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  GeneratedWebsite GeneratedWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  websiteId       String          @db.Uuid
+  
+  BookingService  BookingService? @relation(fields: [serviceId], references: [id])
+  serviceId       String?         @db.Uuid
+  
+  // Customer info
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  
+  // Appointment details
+  date            DateTime        // Date of appointment
+  startTime       String          // "09:00", "14:30"
+  endTime         String          // "09:30", "15:00"
+  
+  // Status
+  status          BookingStatus   @default(PENDING)
+  
+  // Notes
+  notes           String?         @db.Text
+  
+  // Confirmation
+  confirmationCode String         @unique
+  confirmedAt     DateTime?
+  cancelledAt     DateTime?
+  completedAt     DateTime?
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([websiteId])
+  @@index([date])
+  @@index([status])
+  @@index([customerEmail])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+// ============================================================================
+// WEBSITE ANALYTICS
+// ============================================================================
+
+model WebsiteAnalytics {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  GeneratedWebsite GeneratedWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  websiteId       String          @db.Uuid
+  
+  date            DateTime        @db.Date
+  
+  // Traffic
+  pageViews       Int             @default(0)
+  uniqueVisitors  Int             @default(0)
+  
+  // Engagement
+  avgTimeOnSite   Int             @default(0) // in seconds
+  bounceRate      Float           @default(0) // percentage
+  
+  // Conversions
+  bookingClicks   Int             @default(0)
+  bookingsCreated Int             @default(0)
+  chatOpens       Int             @default(0)
+  chatMessages    Int             @default(0)
+  phoneClicks     Int             @default(0)
+  
+  // Sources
+  directTraffic   Int             @default(0)
+  referralTraffic Int             @default(0)
+  
+  createdAt       DateTime        @default(now())
+  
+  @@unique([websiteId, date])
+  @@index([websiteId])
+  @@index([date])
 }
 
 model OutreachEmail {
@@ -626,4 +792,248 @@ enum DealStatus {
   PAID
   CANCELLED
   REFUNDED
+}
+
+// ============================================================================
+// DEAL FINDER AI MODELS
+// ============================================================================
+
+model DealFinderProfile {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String   @unique @db.Uuid
+  
+  // AI learned profile
+  businessType    String?  // "Graphic Designer", "Fitness Coach"
+  services        String[] // ["Logo Design", "Branding"]
+  targetAudience  String?  // "Startups and small businesses"
+  tone            String?  // "Professional but friendly"
+  priceRange      String?  // "$500-$2000"
+  portfolio       String?  // Portfolio URL
+  
+  // Content analysis
+  analyzedPosts   Int      @default(0)
+  analyzedReels   Int      @default(0)
+  lastAnalyzedAt  DateTime?
+  
+  // AI generated summary
+  aiSummary       String?  @db.Text
+  
+  campaigns       OutreachCampaign[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model OutreachCampaign {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  DealFinderProfile DealFinderProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId       String   @db.Uuid
+  
+  name            String
+  status          OutreachCampaignStatus @default(DRAFT)
+  
+  // Search criteria
+  searchMode      SearchMode
+  keywords        String[]
+  targetFollowers String?  // "1K-10K"
+  location        String?
+  hashtags        String[]
+  
+  // Pitch
+  pitchStyle      PitchStyle
+  pitchTemplate   String?  @db.Text
+  
+  // Limits & Safety
+  dailyLimit      Int      @default(50)
+  totalLimit      Int?
+  currentDayCount Int      @default(0)
+  lastResetAt     DateTime @default(now())
+  
+  // Stats
+  totalSent       Int      @default(0)
+  totalOpened     Int      @default(0)
+  totalReplied    Int      @default(0)
+  totalInterested Int      @default(0)
+  dealsWon        Int      @default(0)
+  totalRevenue    Int      @default(0) // in cents
+  
+  prospects       Prospect[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([profileId])
+  @@index([status])
+}
+
+model Prospect {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  OutreachCampaign OutreachCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId      String   @db.Uuid
+  
+  // Instagram info
+  username        String
+  fullName        String?
+  followers       Int?
+  following       Int?
+  postsCount      Int?
+  engagementRate  Float?
+  bio             String?  @db.Text
+  email           String?
+  website         String?
+  profilePicUrl   String?
+  isVerified      Boolean  @default(false)
+  isBusinessAccount Boolean @default(false)
+  
+  // Discovery
+  foundVia        String   // "hashtag", "competitor", "problem_post", "location"
+  sourcePost      String?  // URL of post that triggered discovery
+  sourcePostCaption String? @db.Text
+  painPoint       String?  @db.Text // What problem they have
+  relevanceScore  Float?   // 0-100 how relevant they are
+  
+  // Outreach
+  status          ProspectStatus @default(FOUND)
+  pitchSent       String?  @db.Text // The actual DM sent
+  sentAt          DateTime?
+  openedAt        DateTime?
+  repliedAt       DateTime?
+  lastFollowUpAt  DateTime?
+  followUpCount   Int      @default(0)
+  
+  // Deal
+  interested      Boolean  @default(false)
+  dealClosed      Boolean  @default(false)
+  dealAmount      Int?     // in cents
+  dealClosedAt    DateTime?
+  
+  // Notes
+  notes           String?  @db.Text
+  
+  messages        ProspectMessage[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([campaignId])
+  @@index([status])
+  @@index([username])
+}
+
+model ProspectMessage {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Prospect    Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  prospectId  String   @db.Uuid
+  
+  content     String   @db.Text
+  sender      MessageSender
+  sentAt      DateTime @default(now())
+  read        Boolean  @default(false)
+  
+  @@index([prospectId])
+  @@index([sentAt])
+}
+
+enum OutreachCampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum SearchMode {
+  PROBLEM_POSTS      // People asking for help
+  COMPETITOR_FOLLOWERS
+  HASHTAG_MINING
+  LOCATION_BASED
+  WEBSITE_SCRAPING
+  MANUAL_UPLOAD      // User provides list
+}
+
+enum PitchStyle {
+  PROBLEM_SOLVER     // "Saw you need X, I can help"
+  SOCIAL_PROOF       // "Just helped someone like you"
+  VALUE_FIRST        // "Here's a free tip for you"
+  CURIOSITY          // "Quick question about your business"
+  DIRECT_OFFER       // "I do X for $Y, interested?"
+  CUSTOM             // User writes their own
+}
+
+enum ProspectStatus {
+  FOUND              // Discovered but not contacted
+  QUEUED             // Ready to send DM
+  DM_SENT            // Initial DM sent
+  OPENED             // They read the DM
+  REPLIED            // They responded
+  INTERESTED         // Positive response
+  NEGOTIATING        // Discussing terms
+  DEAL_CLOSED        // Agreement reached
+  NOT_INTERESTED     // Declined
+  GHOSTED            // No response after follow-ups
+  BLOCKED            // They blocked us
+  ARCHIVED           // Manually archived
+}
+
+enum MessageSender {
+  USER
+  PROSPECT
+  SYSTEM
+}
+
+// ============================================================================
+// NOTIFICATION SYSTEM
+// ============================================================================
+
+model Notification {
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String           @db.Uuid
+  
+  type        NotificationType
+  title       String
+  message     String
+  read        Boolean          @default(false)
+  
+  // Optional link to related entity
+  linkUrl     String?
+  
+  createdAt   DateTime         @default(now())
+  
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  DM_SENT           // Automation sent a DM
+  COMMENT_REPLY     // Automation replied to comment
+  AUTOMATION_TRIGGER // Keyword triggered
+  SYSTEM            // System notifications
+  UPGRADE           // Upgrade prompts
+}
+
+
+// ============================================================================
+// USER EMAIL SETTINGS (Gmail OAuth)
+// ============================================================================
+
+model UserEmailSettings {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String   @unique @db.Uuid
+  
+  // Gmail OAuth tokens
+  gmailEmail      String?
+  accessToken     String?  @db.Text
+  refreshToken    String?  @db.Text
+  tokenExpiry     DateTime?
+  
+  // Display settings
+  senderName      String?
+  
+  // Status
+  connected       Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

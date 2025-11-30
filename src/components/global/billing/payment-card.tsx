@@ -1,8 +1,9 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { PLANS } from '@/constants/pages'
-import { cn } from '@/lib/utils'
-import { CircleCheck } from 'lucide-react'
-import React from 'react'
+import { CheckCircle2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 type Props = {
   label: string
@@ -11,91 +12,91 @@ type Props = {
 }
 
 const PaymentCard = ({ current, label, landing }: Props) => {
+  const router = useRouter()
+  const plan = PLANS[label === 'PRO' ? 1 : 0]
+  const isPro = label === 'PRO'
+  const isCurrentPlan = label === current
+
+  const handleUpgrade = async () => {
+    if (isPro && !isCurrentPlan) {
+      try {
+        const response = await fetch('/api/payment')
+        const data = await response.json()
+        if (data.session_url) {
+          router.push(data.session_url)
+        }
+      } catch (error) {
+        console.error('Failed to create checkout:', error)
+      }
+    }
+  }
+
   return (
     <div
-      className={cn(
-        label !== current
-          ? 'bg-in-active'
-          : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500',
-        'p-[2px] rounded-xl overflow-hidden'
-      )}
+      className={`relative rounded-3xl border p-8 transition-all ${
+        isPro 
+          ? 'border-foreground bg-foreground/5' 
+          : 'border-border bg-background'
+      }`}
     >
-      <div
-        className={cn(
-          landing && 'radial--gradient--pink',
-          'flex flex-col rounded-xl pl-5 py-5 pr-10 bg-background-90 h-full'
-        )}
-      >
-        {landing ? (
-          <h2 className="text-2xl">
-            {label === 'PRO' && 'Premium Plan'}
-            {label === 'FREE' && 'Standard'}
-          </h2>
-        ) : (
-          <h2 className="text-2xl">
-            {label === current
-              ? 'Your Current Plan'
-              : current === 'PRO'
-              ? 'Downgrade'
-              : 'Upgrade'}
-          </h2>
-        )}
-        <p className="text-text-secondary text-sm mb-2">
-          This is what your plan covers for automations and Ai features
-        </p>
-        {label === 'PRO' ? (
-          <span className="bg-gradient-to-r text-3xl from-indigo-500 via-purple-500 font-bold to-pink-500 bg-clip-text text-transparent">
-            Smart AI
-          </span>
-        ) : (
-          <p className="font-bold mt-2 text-text-secondary">Standard</p>
-        )}
-        {label === 'PRO' ? (
-          <p className="mb-2">
-            <b className="text-xl">$99</b>/month
-          </p>
-        ) : (
-          <p className="text-xl mb-2">Free</p>
-        )}
-
-        {PLANS[label === 'PRO' ? 1 : 0].features.map((i) => (
-          <p
-            key={i}
-            className="mt-2 text-muted-foreground flex gap-2 "
-          >
-            <CircleCheck className="text-indigo-500" />
-            {i}
-          </p>
-        ))}
-
-        {landing ? (
-          <Button
-            className={cn(
-              'rounded-full mt-5',
-              label === 'PRO'
-                ? 'bg-gradient-to-r from-indigo-500 text-white via-purple-500 to-pink-500'
-                : 'bg-background-80 text-white hover:text-background-80'
-            )}
-          >
-            {label === current
-              ? 'Get Started'
-              : current === 'PRO'
-              ? 'Free'
-              : 'Get Started'}
-          </Button>
-        ) : (
-          <Button
-            className="rounded-full mt-5 bg-background-80 text-white hover:text-background-80"
-            disabled={label === current}
-          >
-            {label === current
-              ? 'Active'
-              : current === 'PRO'
-              ? 'Downgrade'
-              : 'Upgrade'}
-          </Button>
-        )}
+      {/* Current plan badge or Popular badge */}
+      {isCurrentPlan ? (
+        <span className="absolute -top-3 left-6 rounded-full bg-green-500 px-4 py-1 text-xs font-semibold text-white">
+          Current Plan
+        </span>
+      ) : isPro ? (
+        <span className="absolute -top-3 left-6 rounded-full bg-foreground px-4 py-1 text-xs font-semibold text-background">
+          Recommended
+        </span>
+      ) : null}
+      
+      {/* Plan name & description */}
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
+        <p className="text-sm text-muted-foreground">{plan.description}</p>
       </div>
+
+      {/* Price */}
+      <div className="mb-6">
+        <span className="text-5xl font-bold">{isPro ? '$29' : '$0'}</span>
+        <span className="text-muted-foreground">/month</span>
+      </div>
+
+      {/* Features */}
+      <ul className="mb-8 space-y-3">
+        {plan.features.map((feature) => (
+          <li key={feature} className="flex items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+            <span className="text-sm">{feature}</span>
+          </li>
+        ))}
+      </ul>
+
+      {/* CTA Button */}
+      <Button
+        onClick={handleUpgrade}
+        disabled={isCurrentPlan}
+        className={`w-full h-12 rounded-full font-medium transition-all ${
+          isCurrentPlan
+            ? 'bg-muted text-muted-foreground cursor-not-allowed'
+            : isPro
+            ? 'bg-foreground text-background hover:bg-foreground/90'
+            : 'bg-muted text-foreground hover:bg-muted/80'
+        }`}
+      >
+        {isCurrentPlan 
+          ? 'Active' 
+          : isPro 
+          ? 'Upgrade to Pro' 
+          : 'Downgrade'}
+      </Button>
+
+      {/* Cancel anytime text for Pro */}
+      {isPro && !isCurrentPlan && (
+        <p className="text-center text-xs text-muted-foreground mt-3">
+          Cancel anytime
+        </p>
+      )}
     </div>
   )
 }

@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
-import { onActivatePromotion } from '@/actions/marketplace/promotions'
 import { client } from '@/lib/prisma'
 
 export async function POST(req: Request) {
@@ -51,20 +50,6 @@ export async function POST(req: Request) {
           })
           
           console.log(`Pro subscription activated for user ${clerkId}`)
-        }
-        
-        // Handle promotion payment
-        if (session.metadata?.type === 'promotion') {
-          const { productId, tier } = session.metadata
-          
-          if (productId && tier) {
-            await onActivatePromotion(
-              productId,
-              tier as 'BASIC' | 'STANDARD' | 'PREMIUM',
-              session.payment_intent as string
-            )
-            console.log(`Promotion activated for product ${productId}`)
-          }
         }
         break
       }

@@ -5,25 +5,29 @@ type Props = {
   label: string
   subLabel: string
   description: string
+  href: string
 }
 
 export const DASHBOARD_CARDS: Props[] = [
   {
     id: v4(),
-    label: 'Set-up Auto Replies',
-    subLabel: 'Deliver a product lineup through Instagram DM',
-    description: 'Get products in front of your followers in as many places',
+    label: 'Create Automation',
+    subLabel: 'Set up keyword triggers and auto-replies',
+    description: 'Respond to DMs and comments automatically',
+    href: 'automations',
   },
   {
     id: v4(),
-    label: 'Answer Questions with AI',
-    subLabel: 'Identify and respond to queries with AI',
-    description: 'The intention of the message will be automatically detected',
+    label: 'AI Smart Replies',
+    subLabel: 'Let AI craft personalized responses',
+    description: 'Human-like conversations at scale',
+    href: 'automations',
   },
   {
     id: v4(),
-    label: 'Answer Questions with AI',
-    subLabel: 'Identify and respond to queries with AI',
-    description: 'The intention of the message will be automatically detected',
+    label: 'Cold Outreach',
+    subLabel: 'Find leads and close deals',
+    description: 'AI-powered prospect discovery',
+    href: 'cold-call',
   },
 ]

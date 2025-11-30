@@ -8,25 +8,16 @@ import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   Mail,
   Send,
   Loader2,
   ArrowLeft,
-  Sparkles,
   Copy,
   Check,
   ExternalLink,
@@ -38,6 +29,7 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
+import { GmailConnect } from '@/components/gmail-connect'
 
 type Lead = {
   id: string
@@ -205,6 +197,9 @@ export default function OutreachPage() {
         </div>
       </div>
 
+      {/* Gmail Connection Status */}
+      <GmailConnect redirectTo={`/dashboard/${slug}/cold-call/outreach`} />
+
       {/* Info Card */}
       <Card className="p-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/20">
         <div className="flex items-start gap-4">
@@ -214,10 +209,10 @@ export default function OutreachPage() {
           <div>
             <h3 className="font-semibold">How it works</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              1. Select a lead with a generated website<br />
-              2. AI writes a personalized cold email<br />
-              3. Review, edit if needed, and send<br />
-              4. Track responses and close deals
+              1. Connect your Gmail account above<br />
+              2. Select a lead with a generated website<br />
+              3. AI writes a personalized cold email<br />
+              4. Review, edit if needed, and send from your Gmail
             </p>
           </div>
         </div>

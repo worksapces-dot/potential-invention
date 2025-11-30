@@ -1,16 +1,34 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
-import React from 'react'
+import { useRouter } from 'next/navigation'
+import { usePaths } from '@/hooks/user-nav'
 
 type Props = {
   label: string
   subLabel: string
   description: string
+  href?: string
 }
 
-const DoubleGradientCard = ({ description, label, subLabel }: Props) => {
+const DoubleGradientCard = ({ description, label, subLabel, href }: Props) => {
+  const router = useRouter()
+  const { pathname } = usePaths()
+  
+  const handleClick = () => {
+    if (href) {
+      // Get the base dashboard path (e.g., /dashboard/username)
+      const basePath = pathname.split('/').slice(0, 3).join('/')
+      router.push(`${basePath}/${href}`)
+    }
+  }
+
   return (
-    <div className="relative border-[1px] border-in-active/50 p-5 rounded-xl flex flex-col gap-y-20 overflow-hidden">
+    <div 
+      onClick={handleClick}
+      className="relative border-[1px] border-in-active/50 p-5 rounded-xl flex flex-col gap-y-20 overflow-hidden cursor-pointer hover:border-in-active transition-colors"
+    >
       <div className="flex flex-col z-40">
         <h2 className="text-2xl font-medium">{label}</h2>
         <p className="text-text-secondary text-sm">{subLabel}</p>

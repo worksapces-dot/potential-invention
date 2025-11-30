@@ -13,7 +13,6 @@ import {
   Sparkles,
   Target,
   BarChart3,
-  ShoppingBag,
   Bot,
   Link2,
   Play,
@@ -241,7 +240,7 @@ function HeroSection() {
               ))}
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 md:gap-x-8 gap-y-3 text-sm md:text-base font-medium">
-              {["Analytics dashboard", "Template marketplace"].map((item) => (
+              {["Analytics dashboard", "Cold outreach"].map((item) => (
                 <span key={item} className="text-foreground flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
                   {item}
@@ -305,10 +304,10 @@ const features = [
     tag: "New",
   },
   {
-    icon: ShoppingBag,
-    title: "Template Marketplace",
-    description: "Buy and sell automation templates, AI prompts, and keyword lists. Monetize your expertise.",
-    tag: "New",
+    icon: Rocket,
+    title: "Cold Outreach",
+    description: "Find and reach potential clients automatically. Generate leads and grow your business with AI-powered outreach.",
+    tag: "Pro",
   },
 ]
 
@@ -698,40 +697,109 @@ function TestimonialsSection() {
 // CTA SECTION
 // ============================================================================
 
-function CtaSection() {
+function PricingSection() {
+  const plans = [
+    {
+      name: 'Free',
+      price: '$0',
+      period: '/month',
+      description: 'Perfect for getting started',
+      features: [
+        '1 automation',
+        '50 DMs per month',
+        'Basic keyword triggers',
+        'Comment auto-replies',
+      ],
+      cta: 'Get Started',
+      popular: false,
+    },
+    {
+      name: 'Pro',
+      price: '$29',
+      period: '/month',
+      description: 'For serious Instagram growth',
+      features: [
+        'Unlimited automations',
+        'Unlimited DMs',
+        'AI-powered smart replies',
+        'Cold outreach tools',
+        'Advanced analytics',
+        'Priority support',
+      ],
+      cta: 'Start Free Trial',
+      popular: true,
+    },
+  ]
+
   return (
-    <section id="pricing" className="bg-muted/30 py-24 lg:py-36 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-muted/50 rounded-full blur-3xl" />
-      </div>
-
-      <div className="container relative mx-auto px-4 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="mb-8 inline-flex items-center gap-2 rounded-full bg-background px-5 py-2.5 text-sm font-medium text-foreground shadow-sm">
+    <section id="pricing" className="py-24 lg:py-36 border-t border-border/50">
+      <div className="container mx-auto px-4 lg:px-8">
+        <div className="mx-auto mb-16 md:mb-20 max-w-2xl text-center">
+          <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-muted px-5 py-2.5 text-sm font-medium text-foreground">
             <Sparkles className="h-4 w-4" />
-            Start automating today
+            Pricing
           </span>
-
-          <h2 className="mb-6 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-            Ready to automate your Instagram?
+          <h2 className="mb-5 text-balance text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
+            Simple, transparent pricing
           </h2>
-          <p className="mx-auto mb-12 max-w-xl text-lg md:text-xl text-muted-foreground leading-relaxed">
-            {"Join thousands of creators automating their DMs. Start free—no credit card required."}
+          <p className="text-lg md:text-xl text-muted-foreground">
+            Start free. Upgrade when you need more power.
           </p>
-
-          <div className="flex flex-col items-center gap-5">
-            <Link href="/dashboard">
-              <Button
-                size="lg"
-                className="group h-14 md:h-16 px-10 md:px-14 text-base md:text-lg bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-              >
-                Start Automating Free
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
-            <p className="text-sm md:text-base text-muted-foreground">Free plan includes unlimited automations</p>
-          </div>
         </div>
+
+        <div className="mx-auto max-w-4xl grid gap-8 md:grid-cols-2">
+          {plans.map((plan) => (
+            <div
+              key={plan.name}
+              className={`relative rounded-3xl border p-8 ${
+                plan.popular 
+                  ? 'border-foreground bg-foreground/5' 
+                  : 'border-border bg-background'
+              }`}
+            >
+              {plan.popular && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-4 py-1 text-xs font-semibold text-background">
+                  Most Popular
+                </span>
+              )}
+              
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
+                <p className="text-sm text-muted-foreground">{plan.description}</p>
+              </div>
+
+              <div className="mb-6">
+                <span className="text-5xl font-bold">{plan.price}</span>
+                <span className="text-muted-foreground">{plan.period}</span>
+              </div>
+
+              <ul className="mb-8 space-y-3">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+                    <span className="text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link href="/dashboard">
+                <Button
+                  className={`w-full h-12 rounded-full font-medium ${
+                    plan.popular
+                      ? 'bg-foreground text-background hover:bg-foreground/90'
+                      : 'bg-muted text-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {plan.cta}
+                </Button>
+              </Link>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground mt-8">
+          No credit card required. Cancel anytime.
+        </p>
       </div>
     </section>
   )
@@ -770,7 +838,7 @@ function Footer() {
           </div>
 
           {[
-            { title: "Product", links: ["Features", "Marketplace", "Pricing", "Changelog"] },
+            { title: "Product", links: ["Features", "Pricing", "Changelog"] },
             { title: "Resources", links: ["Documentation", "Tutorials", "Blog", "Support"] },
             { title: "Company", links: ["About", "Privacy", "Terms"] },
           ].map((section) => (
@@ -812,7 +880,7 @@ export default function Home() {
       <BenefitsSection />
       <UseCasesSection />
       <TestimonialsSection />
-      <CtaSection />
+      <PricingSection />
       <Footer />
       <ChatWidget />
     </main>

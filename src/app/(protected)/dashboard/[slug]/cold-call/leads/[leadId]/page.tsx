@@ -25,6 +25,8 @@ import {
   Eye,
   Copy,
   Check,
+  Settings,
+  Calendar,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
@@ -300,24 +302,32 @@ export default function LeadDetailPage() {
                   )}
                 </Button>
               </div>
-              <Button
-                onClick={handleGenerateWebsite}
-                disabled={isGenerating}
-                variant="ghost"
-                className="w-full"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Regenerating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Regenerate Website
-                  </>
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleGenerateWebsite}
+                  disabled={isGenerating}
+                  variant="ghost"
+                  className="flex-1"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Regenerating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Regenerate
+                    </>
+                  )}
+                </Button>
+                <Link href={`/dashboard/${slug}/cold-call/leads/${leadId}/settings`}>
+                  <Button variant="outline">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">

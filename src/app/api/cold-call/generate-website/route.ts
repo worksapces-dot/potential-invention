@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Lead ID required' }, { status: 400 })
     }
 
-    const lead = await client.coldCallLead.findFirst({
+    const lead = await (client as any).coldCallLead.findFirst({
       where: {
         id: leadId,
         userId: dbUser.id,
@@ -42,7 +42,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
     }
 
-    const prompt = buildPremiumPrompt(lead)
+    // Get custom images if they exist
+    const customImages = lead.generatedWebsite?.customImages || []
+    const logoUrl = lead.generatedWebsite?.logoUrl || null
+
+    const prompt = buildPremiumPrompt(lead, customImages)
     
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -67,7 +71,7 @@ export async function POST(req: NextRequest) {
       .replace(/```\n?/g, '')
       .trim()
 
-    const fullHtml = wrapWithPremiumTemplate(cleanHtml, lead)
+    const fullHtml = wrapWithPremiumTemplate(cleanHtml, lead, { customImages, logoUrl })
 
     const websiteData = {
       template: lead.category,
@@ -112,189 +116,262 @@ export async function POST(req: NextRequest) {
   }
 }
 
-const SYSTEM_PROMPT = `You are an elite web designer who creates stunning, award-winning websites that look like they cost $50,000+.
+const SYSTEM_PROMPT = `You are a world-class web designer from a top agency like Pentagram or Huge. You create minimal, sophisticated websites that win Awwwards.
 
-Your designs are characterized by:
-- PREMIUM AESTHETICS: Clean, sophisticated, luxurious feel
-- MODERN TRENDS: Glass morphism, subtle gradients, micro-animations
-- PERFECT TYPOGRAPHY: Beautiful font pairings, proper hierarchy, generous spacing
-- VISUAL HIERARCHY: Clear sections, breathing room, intentional whitespace
-- TRUST SIGNALS: Professional imagery, social proof, credibility markers
-- CONVERSION FOCUSED: Clear CTAs, easy navigation, compelling copy
+DESIGN PHILOSOPHY:
+- MINIMAL & ELEGANT: Less is more. Whitespace is your friend.
+- EDITORIAL FEEL: Like a luxury magazine - clean, refined, intentional
+- ASYMMETRIC LAYOUTS: Break the grid thoughtfully. Split screens, offset elements.
+- TYPOGRAPHY-FIRST: Type IS the design. Large, bold headlines. Thin elegant body text.
+- MUTED COLORS: Sophisticated palettes - off-whites, warm grays, one accent color
+- SUBTLE ANIMATIONS: Gentle fades, smooth transitions. Never flashy.
 
-Design Rules:
-1. Use a cohesive, sophisticated color palette (max 3-4 colors)
-2. Large, bold headlines with elegant body text
-3. Generous padding and margins (sections should breathe)
-4. Subtle shadows and depth (not flat, not overdone)
-5. Rounded corners on cards and buttons (modern feel)
-6. High-quality placeholder images from Unsplash
-7. Smooth hover effects and transitions
-8. Mobile-first responsive design
-9. Professional iconography (Lucide icons)
-10. Trust badges, ratings, testimonials
+STRICT DESIGN RULES:
+1. HERO: Full viewport, split layout (text left, image right) or large image with overlay text
+2. TYPOGRAPHY: Use font-weight contrasts (900 for headlines, 300 for body). Letter-spacing on caps.
+3. SPACING: Minimum py-24 for sections. Generous gaps (gap-16, gap-20). Let content breathe.
+4. COLORS: Background #fafafa or #f5f5f4. Text #1a1a1a. One muted accent (terracotta, sage, navy)
+5. IMAGES: Large, cinematic. Use aspect-[4/3] or aspect-[3/4]. Rounded corners (rounded-2xl)
+6. NAVIGATION: Minimal. Logo left, few links center/right. Sticky, transparent or light bg.
+7. BUTTONS: Understated. Border buttons or text links with arrows. No heavy gradients.
+8. GRID: Use asymmetric grids. 60/40 splits. Offset images. Overlapping elements.
+9. FOOTER: Simple, elegant. Dark or light. Minimal links.
+10. NO CLUTTER: Remove anything unnecessary. Every element must earn its place.
+
+LAYOUT PATTERNS TO USE:
+- Split hero: Large headline left (text-6xl md:text-8xl), full-height image right
+- Bento grid: Asymmetric card layouts with varying sizes
+- Editorial sections: Large image with small text block offset
+- Feature strips: Icon + text in horizontal rows with lots of space
+- Testimonials: Single large quote, minimal styling
 
 Return ONLY the HTML code inside the <body> tag. No explanations, no markdown.`
 
-function buildPremiumPrompt(lead: any): string {
+function buildPremiumPrompt(lead: any, customImages: string[] = []): string {
   const categoryStyles: Record<string, any> = {
     restaurant: {
-      vibe: 'warm, inviting, appetizing',
-      colors: 'warm earth tones, deep burgundy or forest green accent',
-      imagery: 'food, dining atmosphere, chef',
-      sections: ['Hero with signature dish', 'About/Story', 'Menu Highlights', 'Ambiance Gallery', 'Reviews', 'Reservation CTA', 'Location & Hours'],
+      accent: '#8B4513',
+      accentName: 'warm sienna',
+      imagery: ['1414235077428-338989a2e8c0', '1517248135467-4c7edcad34c4', '1552566626-52f8b828add9'],
+      tagline: 'A Culinary Experience',
     },
     cafe: {
-      vibe: 'cozy, artisanal, instagram-worthy',
-      colors: 'warm browns, cream, terracotta accents',
-      imagery: 'coffee, pastries, cozy interior',
-      sections: ['Hero with latte art', 'Our Story', 'Menu', 'The Space', 'Reviews', 'Visit Us'],
+      accent: '#C4A484',
+      accentName: 'warm taupe',
+      imagery: ['1495474472287-4d71bcdd2085', '1501339847302-ac426a4a7cbb', '1509042239860-f550ce710b93'],
+      tagline: 'Crafted With Care',
     },
     salon: {
-      vibe: 'chic, stylish, luxurious',
-      colors: 'black, white, gold or rose gold accents',
-      imagery: 'hair styling, beauty, elegant interior',
-      sections: ['Hero with transformation', 'Services & Pricing', 'Our Stylists', 'Gallery', 'Reviews', 'Book Now'],
+      accent: '#B8860B',
+      accentName: 'golden',
+      imagery: ['1560066984-138dadb4c035', '1522337360788-8b13dee7a37e', '1521590832167-7bcbfaa6381f'],
+      tagline: 'Your Style, Elevated',
     },
     dentist: {
-      vibe: 'clean, trustworthy, modern medical',
-      colors: 'clean whites, soft blues, teal accents',
-      imagery: 'smiling patients, modern equipment, friendly staff',
-      sections: ['Hero with happy smile', 'Services', 'Meet the Team', 'Technology', 'Patient Reviews', 'Book Appointment'],
+      accent: '#5F9EA0',
+      accentName: 'calm teal',
+      imagery: ['1629909613654-28e377c37b09', '1588776814546-1ffcf47267a5', '1606811841689-23dfddce3e95'],
+      tagline: 'Smile With Confidence',
     },
     plumber: {
-      vibe: 'reliable, professional, trustworthy',
-      colors: 'navy blue, white, orange or yellow accents',
-      imagery: 'professional technician, tools, happy homeowner',
-      sections: ['Hero with emergency CTA', 'Services', 'Why Choose Us', 'Service Areas', 'Reviews', 'Get Quote'],
+      accent: '#2F4F4F',
+      accentName: 'slate',
+      imagery: ['1581578731548-c64695cc6952', '1504328345606-18bbc8c9d7d1', '1558618666-fcd25c85cd64'],
+      tagline: 'Reliable. Professional. Fast.',
     },
     electrician: {
-      vibe: 'safe, professional, certified',
-      colors: 'dark blue, yellow/amber accents, white',
-      imagery: 'electrician at work, modern home, safety',
-      sections: ['Hero with 24/7 service', 'Services', 'Certifications', 'Projects', 'Reviews', 'Contact'],
+      accent: '#DAA520',
+      accentName: 'amber',
+      imagery: ['1621905251189-08b45d6a269e', '1558618666-fcd25c85cd64', '1581578731548-c64695cc6952'],
+      tagline: 'Powering Your World Safely',
     },
     gym: {
-      vibe: 'energetic, motivating, powerful',
-      colors: 'dark/black, vibrant red or orange accents',
-      imagery: 'fitness, equipment, motivated people',
-      sections: ['Hero with motivation', 'Memberships', 'Facilities', 'Classes', 'Trainers', 'Join Now'],
-    },
-    auto_repair: {
-      vibe: 'trustworthy, expert, honest',
-      colors: 'red, black, white, metallic accents',
-      imagery: 'mechanics, cars, garage',
-      sections: ['Hero with expertise', 'Services', 'Why Us', 'Certifications', 'Reviews', 'Schedule Service'],
-    },
-    cleaning: {
-      vibe: 'fresh, sparkling, reliable',
-      colors: 'fresh greens, clean blues, white',
-      imagery: 'clean spaces, happy clients, professional team',
-      sections: ['Hero with transformation', 'Services', 'Pricing', 'Process', 'Reviews', 'Get Quote'],
-    },
-    landscaping: {
-      vibe: 'natural, beautiful, transformative',
-      colors: 'greens, earth tones, sky blue',
-      imagery: 'beautiful gardens, before/after, outdoor living',
-      sections: ['Hero with stunning yard', 'Services', 'Portfolio', 'Process', 'Reviews', 'Free Estimate'],
-    },
-    bakery: {
-      vibe: 'sweet, artisanal, homemade',
-      colors: 'soft pinks, cream, warm browns',
-      imagery: 'fresh baked goods, pastries, cozy shop',
-      sections: ['Hero with signature item', 'Our Treats', 'Custom Orders', 'About Us', 'Reviews', 'Order Now'],
+      accent: '#DC143C',
+      accentName: 'crimson',
+      imagery: ['1534438327276-14e5300c3a48', '1571902943202-507ec2618e8f', '1517836357463-d25dfeac3438'],
+      tagline: 'Transform Your Limits',
     },
     spa: {
-      vibe: 'serene, luxurious, rejuvenating',
-      colors: 'soft neutrals, sage green, lavender accents',
-      imagery: 'relaxation, treatments, peaceful environment',
-      sections: ['Hero with tranquility', 'Treatments', 'Packages', 'The Experience', 'Reviews', 'Book Treatment'],
+      accent: '#9CAF88',
+      accentName: 'sage',
+      imagery: ['1544161515-4ab6ce6db874', '1540555700478-4be289fbecef', '1507003211169-0a1dd7228f2d'],
+      tagline: 'Restore. Renew. Relax.',
+    },
+    auto_repair: {
+      accent: '#B22222',
+      accentName: 'deep red',
+      imagery: ['1486262715619-67b85e0b08d3', '1558618666-fcd25c85cd64', '1530046339160-ce3e530c7d2f'],
+      tagline: 'Expert Care For Your Vehicle',
+    },
+    cleaning: {
+      accent: '#4682B4',
+      accentName: 'steel blue',
+      imagery: ['1581578731548-c64695cc6952', '1527515637462-cff94eecc1ac', '1558317374-067fb5f30001'],
+      tagline: 'Spotless. Every Time.',
+    },
+    landscaping: {
+      accent: '#556B2F',
+      accentName: 'olive',
+      imagery: ['1558904541-efa843a96f01', '1416879595882-3373a0480b5b', '1585320806297-9794b3e4eeae'],
+      tagline: 'Nature, Perfected',
+    },
+    bakery: {
+      accent: '#DEB887',
+      accentName: 'warm wheat',
+      imagery: ['1509440159562-66b02b259e5c', '1486427944299-d1955d23e34d', '1517433670267-30f206be5f84'],
+      tagline: 'Baked Fresh Daily',
     },
   }
 
   const style = categoryStyles[lead.category] || {
-    vibe: 'professional, trustworthy, modern',
-    colors: 'navy blue, white, accent color',
-    imagery: 'professional service, happy customers',
-    sections: ['Hero', 'Services', 'About', 'Reviews', 'Contact'],
+    accent: '#374151',
+    accentName: 'charcoal',
+    imagery: ['1497366216548-37526070297c', '1497366811353-6870744d04b2'],
+    tagline: 'Excellence In Every Detail',
   }
 
-  return `Create a STUNNING, premium website for:
+  const mainImage = style.imagery[0]
+  const secondaryImage = style.imagery[1] || style.imagery[0]
 
-**Business:** ${lead.businessName}
-**Type:** ${lead.category.replace(/_/g, ' ')}
-**Location:** ${lead.city}, ${lead.country}
-**Phone:** ${lead.phone || '(555) 123-4567'}
-**Rating:** ${lead.rating ? `${lead.rating}★ (${lead.reviewCount} reviews)` : '5.0★ (New)'}
+  // Use custom images if available, otherwise use Unsplash
+  const heroImage = customImages[0] || `https://images.unsplash.com/photo-${mainImage}?w=1200&q=80`
+  const aboutImage = customImages[1] || `https://images.unsplash.com/photo-${secondaryImage}?w=800&q=80`
+  const galleryImages = customImages.length > 2 ? customImages.slice(2) : []
 
-**Design Direction:**
-- Vibe: ${style.vibe}
-- Color Palette: ${style.colors}
-- Imagery Style: ${style.imagery}
+  return `Create a MINIMAL, SOPHISTICATED website for:
 
-**Required Sections:**
-${style.sections.map((s: string, i: number) => `${i + 1}. ${s}`).join('\n')}
+BUSINESS: ${lead.businessName}
+TYPE: ${lead.category.replace(/_/g, ' ')}
+LOCATION: ${lead.city}, ${lead.country}
+PHONE: ${lead.phone || '(555) 123-4567'}
+TAGLINE: "${style.tagline}"
 
-**Design Requirements:**
+DESIGN SYSTEM:
+- Background: #fafaf9 (warm off-white)
+- Text: #1c1917 (warm black)
+- Accent: ${style.accent} (${style.accentName})
+- Secondary: #78716c (warm gray)
 
-HERO SECTION:
-- Full viewport height (min-h-screen)
-- Stunning background image from Unsplash (use https://images.unsplash.com/photo-[relevant-id]?w=1920&q=80)
-- Dark overlay for text readability
-- Large, bold headline (text-5xl md:text-7xl)
-- Compelling subheadline
-- Primary CTA button (large, rounded-full, with hover effect)
-- Secondary link or scroll indicator
+IMAGES TO USE (IMPORTANT - use these exact URLs):
+- Hero image: ${heroImage}
+- About/Secondary image: ${aboutImage}
+${galleryImages.length > 0 ? `- Gallery images: ${galleryImages.join(', ')}` : ''}
 
-TYPOGRAPHY:
-- Headlines: font-bold, tracking-tight
-- Body: text-lg, text-gray-600, leading-relaxed
-- Use Inter or system fonts
+=== EXACT STRUCTURE TO FOLLOW ===
 
-SPACING:
-- Sections: py-20 md:py-32
-- Container: max-w-7xl mx-auto px-4 md:px-8
-- Cards: p-8 md:p-10
-- Generous gaps between elements
+1. NAVIGATION (sticky top-0, bg-white/80 backdrop-blur):
+   - Logo/name on left (text-xl font-semibold tracking-tight)
+   - 3-4 minimal links on right (text-sm font-medium text-gray-600 hover:text-black)
+   - Use: "About", "Services", "Contact"
 
-COMPONENTS:
-- Cards with subtle shadows (shadow-xl) and rounded-2xl
-- Buttons: px-8 py-4 rounded-full with hover:scale-105 transition
-- Images: rounded-2xl with object-cover
-- Icons: Use Lucide icons (already included)
+2. HERO SECTION (min-h-screen, grid grid-cols-1 lg:grid-cols-2):
+   LEFT SIDE (flex flex-col justify-center px-8 lg:px-16):
+   - Small caps label: "• ${lead.category.toUpperCase().replace(/_/g, ' ')}" (text-xs tracking-[0.2em] text-gray-500)
+   - Main headline: Split into 2 lines, first line regular, second line in accent color
+     Example: "Quality" (text-6xl lg:text-8xl font-light) + "& Care" (same size, accent color)
+   - Subtitle: 2 lines max (text-lg text-gray-500 mt-6 max-w-md)
+   - CTA: Text link with arrow "View Services →" (text-sm font-medium mt-8 hover:underline)
+   
+   RIGHT SIDE:
+   - Full height image (h-[70vh] lg:h-screen object-cover)
+   - Add small location badge overlay: "${lead.city}" (absolute bottom-8 left-8, bg-white/90 px-4 py-2 text-xs)
 
-EFFECTS:
-- Smooth transitions: transition-all duration-300
-- Hover states on all interactive elements
-- Subtle background patterns or gradients
+3. FEATURES STRIP (py-8 border-y border-gray-200):
+   - 3 items in a row (grid grid-cols-3 gap-8 max-w-4xl mx-auto)
+   - Each: Icon (w-5 h-5) + text (text-sm text-gray-600)
+   - Examples: "Licensed & Insured", "5-Star Rated", "Same Day Service"
 
-FOOTER:
-- Dark background
-- Business info, quick links, social icons
-- Copyright with current year
+4. ABOUT SECTION (py-32 px-8):
+   - Asymmetric layout: Image on left (60%), text on right (40%)
+   - Image: aspect-[4/5] rounded-3xl
+   - Text: Small label "ABOUT US", headline (text-4xl font-light), paragraph (text-gray-600), link
 
-Use these Unsplash images (pick relevant ones):
-- Restaurant/Food: photo-1517248135467-4c7edcad34c4, photo-1414235077428-338989a2e8c0
-- Cafe/Coffee: photo-1495474472287-4d71bcdd2085, photo-1501339847302-ac426a4a7cbb
-- Salon/Beauty: photo-1560066984-138dadb4c035, photo-1522337360788-8b13dee7a37e
-- Dental/Medical: photo-1629909613654-28e377c37b09, photo-1588776814546-1ffcf47267a5
-- Home Services: photo-1581578731548-c64695cc6952, photo-1621905251189-08b45d6a269e
-- Fitness/Gym: photo-1534438327276-14e5300c3a48, photo-1571902943202-507ec2618e8f
-- Spa/Wellness: photo-1544161515-4ab6ce6db874, photo-1540555700478-4be289fbecef
+5. SERVICES SECTION (py-32 bg-gray-50):
+   - Section label + headline centered
+   - Bento grid of services (grid-cols-2 lg:grid-cols-3 gap-4)
+   - Each card: bg-white p-8 rounded-2xl, service name (font-medium), brief description (text-sm text-gray-500)
 
-Generate the complete HTML now. Make it look like a $50,000 website.`
+6. TESTIMONIAL (py-32):
+   - Single large quote centered (text-3xl lg:text-4xl font-light italic max-w-3xl mx-auto text-center)
+   - Author name below (text-sm text-gray-500 mt-8)
+
+7. CTA SECTION (py-24 bg-[${style.accent}] text-white):
+   - Simple centered: Headline + subtitle + button (bg-white text-black)
+
+8. FOOTER (py-16 bg-gray-900 text-white):
+   - Grid: Logo/about, Quick Links, Contact Info
+   - Copyright at bottom (text-sm text-gray-500)
+
+CRITICAL RULES:
+- NO gradients on buttons (use solid colors or borders)
+- NO heavy shadows (use shadow-sm or none)
+- NO rounded-full on cards (use rounded-2xl or rounded-3xl)
+- Headlines: font-light or font-normal, NOT bold
+- Lots of whitespace (py-32 for sections minimum)
+- Images should be LARGE and cinematic
+- Keep copy SHORT and elegant`
 }
 
-function wrapWithPremiumTemplate(html: string, lead: any): string {
+function wrapWithPremiumTemplate(
+  html: string, 
+  lead: any, 
+  options: { customImages?: string[], logoUrl?: string | null } = {}
+): string {
   const chatbotContext = buildChatbotContext(lead)
+  const { customImages = [], logoUrl } = options
+  
+  // SEO data
+  const seoTitle = lead.generatedWebsite?.seoTitle || `${lead.businessName} | ${lead.category.replace(/_/g, ' ')} in ${lead.city}`
+  const seoDesc = lead.generatedWebsite?.seoDescription || `${lead.businessName} - Professional ${lead.category.replace(/_/g, ' ')} services in ${lead.city}. Quality service, trusted by locals.`
+  const seoKeywords = lead.generatedWebsite?.seoKeywords?.join(', ') || `${lead.category.replace(/_/g, ' ')}, ${lead.city}, ${lead.businessName}`
+  const heroImage = customImages[0] || `https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80`
   
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${lead.businessName} | ${lead.city}</title>
-  <meta name="description" content="${lead.businessName} - Premium ${lead.category.replace(/_/g, ' ')} services in ${lead.city}. Contact us today!">
+  
+  <!-- Primary SEO -->
+  <title>${seoTitle}</title>
+  <meta name="description" content="${seoDesc}">
+  <meta name="keywords" content="${seoKeywords}">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${seoTitle}">
+  <meta property="og:description" content="${seoDesc}">
+  <meta property="og:image" content="${heroImage}">
+  <meta property="og:site_name" content="${lead.businessName}">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${seoTitle}">
+  <meta name="twitter:description" content="${seoDesc}">
+  <meta name="twitter:image" content="${heroImage}">
+  
+  <!-- Local Business Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "${lead.businessName}",
+    "description": "${seoDesc}",
+    "image": "${heroImage}",
+    "telephone": "${lead.phone || ''}",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "${lead.city}",
+      "addressCountry": "${lead.country}"
+    }${lead.rating ? `,
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "${lead.rating}",
+      "reviewCount": "${lead.reviewCount || 1}"
+    }` : ''}
+  }
+  </script>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -305,54 +382,66 @@ function wrapWithPremiumTemplate(html: string, lead: any): string {
           fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
           },
+          colors: {
+            stone: {
+              50: '#fafaf9',
+              100: '#f5f5f4',
+              200: '#e7e5e4',
+              800: '#292524',
+              900: '#1c1917',
+            }
+          }
         },
       },
     }
   </script>
   
-  <!-- Google Fonts -->
+  <!-- Google Fonts - Using lighter weights for elegance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   
   <style>
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', system-ui, sans-serif; }
+    body { 
+      font-family: 'Inter', system-ui, sans-serif; 
+      background-color: #fafaf9;
+      color: #1c1917;
+      -webkit-font-smoothing: antialiased;
+    }
     
-    /* Smooth animations */
-    .fade-in { animation: fadeIn 0.6s ease-out; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+    /* Elegant animations */
+    .fade-up { 
+      animation: fadeUp 0.8s ease-out; 
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
     }
     
-    /* Glass effect */
-    .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Subtle hover */
+    .hover-subtle {
+      transition: all 0.3s ease;
+    }
+    .hover-subtle:hover {
+      opacity: 0.7;
     }
     
-    /* Gradient text */
-    .gradient-text {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    /* Image zoom on hover */
+    .img-zoom {
+      overflow: hidden;
+    }
+    .img-zoom img {
+      transition: transform 0.6s ease;
+    }
+    .img-zoom:hover img {
+      transform: scale(1.05);
     }
     
-    /* Hover lift */
-    .hover-lift {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .hover-lift:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    }
-    
-    /* Chatbot styles */
+    /* Chatbot styles - more minimal */
     #chatbot-widget {
       position: fixed;
       bottom: 24px;
@@ -362,44 +451,45 @@ function wrapWithPremiumTemplate(html: string, lead: any): string {
     }
     
     #chatbot-button {
-      width: 60px;
-      height: 60px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #1c1917;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
     #chatbot-button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 30px rgba(102, 126, 234, 0.5);
+      transform: scale(1.05);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
     }
     
     #chatbot-button svg {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       color: white;
     }
     
     #chatbot-window {
       position: absolute;
-      bottom: 80px;
+      bottom: 72px;
       right: 0;
-      width: 380px;
+      width: 360px;
       max-width: calc(100vw - 48px);
-      height: 500px;
+      height: 480px;
       max-height: calc(100vh - 120px);
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15);
+      background: #fafaf9;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
       display: none;
       flex-direction: column;
       overflow: hidden;
+      border: 1px solid #e7e5e4;
     }
     
     #chatbot-window.open {
@@ -413,33 +503,33 @@ function wrapWithPremiumTemplate(html: string, lead: any): string {
     }
     
     #chatbot-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #1c1917;
       color: white;
-      padding: 20px;
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       gap: 12px;
     }
     
     #chatbot-header-avatar {
-      width: 45px;
-      height: 45px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     
     #chatbot-header-info h3 {
-      font-weight: 600;
-      font-size: 16px;
+      font-weight: 500;
+      font-size: 15px;
       margin: 0;
     }
     
     #chatbot-header-info p {
-      font-size: 13px;
-      opacity: 0.9;
+      font-size: 12px;
+      opacity: 0.7;
       margin: 2px 0 0 0;
     }
     
@@ -450,7 +540,7 @@ function wrapWithPremiumTemplate(html: string, lead: any): string {
       color: white;
       cursor: pointer;
       padding: 4px;
-      opacity: 0.8;
+      opacity: 0.6;
       transition: opacity 0.2s;
     }
     
@@ -464,7 +554,8 @@ function wrapWithPremiumTemplate(html: string, lead: any): string {
       padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
+      background: white;
     }
     
     .chat-message {
@@ -476,16 +567,18 @@ function wrapWithPremiumTemplate(html: string, lead: any): string {
     }
     
     .chat-message.bot {
-      background: #f1f3f4;
-      color: #1a1a1a;
+      background: #f5f5f4;
+      color: #1c1917;
       align-self: flex-start;
+      border-radius: 16px;
       border-bottom-left-radius: 4px;
     }
     
     .chat-message.user {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #1c1917;
       color: white;
       align-self: flex-end;
+      border-radius: 16px;
       border-bottom-right-radius: 4px;
     }
     
@@ -496,9 +589,9 @@ function wrapWithPremiumTemplate(html: string, lead: any): string {
     }
     
     .typing-dot {
-      width: 8px;
-      height: 8px;
-      background: #999;
+      width: 6px;
+      height: 6px;
+      background: #a8a29e;
       border-radius: 50%;
       animation: typingBounce 1.4s infinite ease-in-out;
     }
@@ -509,78 +602,81 @@ function wrapWithPremiumTemplate(html: string, lead: any): string {
     
     @keyframes typingBounce {
       0%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-6px); }
+      40% { transform: translateY(-4px); }
     }
     
     #chatbot-input-area {
       padding: 16px;
-      border-top: 1px solid #eee;
+      border-top: 1px solid #e7e5e4;
       display: flex;
       gap: 10px;
+      background: white;
     }
     
     #chatbot-input {
       flex: 1;
       padding: 12px 16px;
-      border: 1px solid #e0e0e0;
-      border-radius: 25px;
+      border: 1px solid #e7e5e4;
+      border-radius: 12px;
       font-size: 14px;
       outline: none;
       transition: border-color 0.2s;
+      background: #fafaf9;
     }
     
     #chatbot-input:focus {
-      border-color: #667eea;
+      border-color: #1c1917;
     }
     
     #chatbot-send {
       width: 44px;
       height: 44px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      background: #1c1917;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.2s;
+      transition: opacity 0.2s;
     }
     
     #chatbot-send:hover {
-      transform: scale(1.05);
+      opacity: 0.8;
     }
     
     #chatbot-send svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       color: white;
     }
     
     .quick-replies {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 6px;
+      margin-top: 10px;
     }
     
     .quick-reply {
-      padding: 8px 14px;
+      padding: 6px 12px;
       background: white;
-      border: 1px solid #667eea;
-      color: #667eea;
-      border-radius: 20px;
-      font-size: 13px;
+      border: 1px solid #e7e5e4;
+      color: #1c1917;
+      border-radius: 8px;
+      font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
     }
     
     .quick-reply:hover {
-      background: #667eea;
+      background: #1c1917;
       color: white;
+      border-color: #1c1917;
     }
   </style>
 </head>
-<body class="bg-white text-gray-900 antialiased">
+<body class="bg-stone-50 text-stone-900 antialiased">
 ${html}
 
 <!-- AI Chatbot Widget -->
